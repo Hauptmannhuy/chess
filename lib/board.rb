@@ -10,7 +10,7 @@ class Board
   place_first_line(color)
   place_second_line(color)
   end
-  
+
   def place_first_line(color)
     y = color == 'white' ? 1 : 6
     x = 0
@@ -32,33 +32,82 @@ class Board
     @grid[y] = line
   end
 
-  
+
   def display
     array = []
     num = 1
     @grid.each do |row|
-      i = 0 
+      i = 0
       part = []
-        part << num
+      part << num
       num+=1
       row.each do |piece|
-        part << piece.symbol if piece != '-'
+        part << piece.symbol if piece != '-' && !piece.instance_of?(Integer)
         part << piece if piece == '-'
         array << part if i == 7
         i+=1
       end
     end
    array.each do |row|
-     
      puts row.join(' ')
    end
     puts ['*',*('a'..'h')].join(' ').upcase
   end
 
-  def move(piece, start, finish)
-    
-    
+  def player_move
+    loop do
+    puts 'Type coordinates to select a piece (For example: 2A)'
+    start = select_coordinate
+    x,y = start
+    piece = @grid[x][y]
+    puts 'Type coordinates to select a destination (For example: 3A)'
+    destination = select_coordinate
+     if process_path(piece, start, destination,@grid)
+     return change_squares(piece, start, destination)
+     else
+        puts 'Invalid move. Try again.'
+     end
+    end
+  end
 
+  def process_path(piece, start, destination,board)
+    piece.valid_move?(start,destination,board)
+
+
+  end
+
+  def change_squares(piece, start, destination)
+    x,y = start
+    i,j = destination
+    @grid[i][j] = piece
+    @grid[x][y] = piece
+  end
+
+
+
+
+  def select_coordinate
+    loop do
+    input = gets.chomp.downcase.split('')
+    verified_coordinates = verify_coordinates(input)
+   return translated_coordinates = translate_coordinates(verified_coordinates)
+  end
+  end
+
+  def translate_coordinates(input)
+    arr = ('a'..'h').to_a
+    x,y = input
+    [x.to_i - 1, arr.index(y) + 1]
+
+  end
+
+  def verify_coordinates(input)
+    loop do
+      x,y = input
+      return input if y.between?('a','h')
+      puts 'Error! Select correct value.'
+      input = gets.chomp.downcase.split('')
+    end
   end
 
 end
