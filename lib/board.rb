@@ -79,8 +79,9 @@ class Board
   def change_squares(piece, start, destination)
     x,y = start
     i,j = destination
+    empty_square = '-'
     @grid[i][j] = piece
-    @grid[x][y] = piece
+    @grid[x][y] = empty_square
   end
 
 
