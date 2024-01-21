@@ -22,7 +22,6 @@ class Piece
   def pave_path(start, destination, table, range, empty_square)
     x,y = start
     i,j = destination
-    table[i][j] = 'destination'
     destination_square = table[i][j]
     sequence = []
 
@@ -35,7 +34,7 @@ class Piece
          square_content = table[new_x][new_y]
          square_content
 
-         if square_content == 'destination'
+         if square_content == destination_square
            return true if check_sequence(sequence, empty_square)
          end
 
@@ -52,11 +51,12 @@ class Piece
     end
 
  def destination_valid?(destination,table)
-  own_side = self.color
   x,y = destination
-  return true if table[x][y].instance_of?(String)
-  return false if table[x][y].instance_of?(King)
-  return false if table[x][y].color == own_side
+  square = table[x][y].cell
+  own_side = self.color
+  return true if square == nil
+  return false if square.instance_of?(King)
+  return false if square.color == own_side
 end
 
 end
