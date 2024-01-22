@@ -57,7 +57,7 @@ class Board
   def player_move
     loop do
     puts 'Type coordinates to select a piece (For example: 2A)'
-    start = select_coordinate
+    start = select_coordinate(true)
     x,y = start
     piece = @grid[x][y].cell
     puts 'Type coordinates to select a destination (For example: 3A)'
@@ -88,18 +88,35 @@ class Board
 
 
 
-  def select_coordinate
+  def select_coordinate(start_coordinate = false)
     loop do
     input = gets.chomp.downcase.split('')
     verified_coordinates = verify_coordinates(input)
-   return translated_coordinates = translate_coordinates(verified_coordinates)
+    translated_coordinates = translate_coordinates(verified_coordinates)
+    if start_coordinate == false
+      return translated_coordinates if translated_coordinates && start_coordinate == false
+    else
+      is_square_nil = square_not_nil?(translated_coordinates)
+      return is_square_nil if is_square_nil && start_coordinate == true
+    end
   end
+  end
+
+  def square_not_nil?(input)
+    x,y = input
+    square = @grid[x][y].cell
+    if square.nil?
+      puts 'You cannot select empty square as start point!'
+      return false
+    else
+      [x,y]
+    end
   end
 
   def translate_coordinates(input)
     arr = ('a'..'h').to_a
     x,y = input
-    [x.to_i - 1, arr.index(y)]
+    [x.to_i-1, arr.index(y)]
 
   end
 

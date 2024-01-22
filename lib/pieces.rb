@@ -11,9 +11,9 @@ class Piece
 
   def path_available?(start,destination,table)
     range = self.range
-    empty_square = '-'
+    empty_square = nil
     if self.instance_of?(Knight)
-      #code
+      knight_moves(start, destination, table, empty_square)
     else
      pave_path(start, destination, table, range, empty_square)
     end
@@ -23,6 +23,7 @@ class Piece
     x,y = start
     i,j = destination
     destination_square = table[i][j]
+    self.directions = [[1,1],[1,-1]] if self.instance_of?(Pawn) && destination_square.cell != nil
     sequence = []
 
     self.directions.each do | dx, dy |
@@ -32,7 +33,7 @@ class Piece
 
         if (new_x).between?(0,7) && (new_y).between?(0,7)
          square_content = table[new_x][new_y]
-         square_content
+         square_content.cell
 
          if square_content == destination_square
            return true if check_sequence(sequence, empty_square)
@@ -45,8 +46,23 @@ class Piece
     false
     end
 
+    def knight_moves(start,destination, table, empty_square)
+      x,y = start
+      i,j = destination
+      destination_square = table[i][j]
+
+      self.directions.each do | dx, dy |
+        new_x = x+dx
+        new_y = y+dy
+        if (x+dx).between?(0,7) && (y+dy).between?(0,7)
+        square = table[new_x][new_y]
+            return true if square == destination_square
+          end
+      end
+      false
+    end
+
     def check_sequence(sequence, empty_square)
-      p sequence
        return true if sequence.all?(empty_square)
     end
 
@@ -57,13 +73,14 @@ class Piece
   return true if square == nil
   return false if square.instance_of?(King)
   return false if square.color == own_side
+  true
 end
 
 end
 
   class Pawn < Piece
     def initialize(color=nil)
-      @directions = [[1,0],[1,1],[1,-1]]
+      @directions = [[1,0]]
       @first_move = true
       @symbol = color == 'white' ? 'p' : 'p'
       super(color)
@@ -74,6 +91,8 @@ end
   class Bishop < Piece
     def initialize(color=nil)
       @symbol = color == 'white' ? 'b' : 'b'
+      @range = 7
+      @directions = [[1,1],[1,-1],[-1,1],[-1,-1]]
       super(color)
 
     end
@@ -82,16 +101,17 @@ end
     class Rook < Piece
       def initialize(color=nil)
         @symbol = color == 'white' ? 'r' : 'r'
+        @range = 7
+        @directions = [[1,0],[-1,0],[0,1],[0,-1]]
         super(color)
       end
     end
 
     class Knight < Piece
       def initialize(color=nil)
+        @directions = [[2,1],[2,-1],[-1,-2],[1,-2],[-2,-1],[-2,1],[1,2],[-1,2]]
         @symbol = color == 'white' ? 'n' : 'n'
         super(color)
-        @directions = [[1,0][-1,0],[0,-1][0,1]]
-        @range = 2
 
       end
       end
@@ -99,6 +119,8 @@ end
     class Queen < Piece
       def initialize(color=nil)
         @symbol = color == 'white' ? 'q' : 'q'
+        @range = 7
+        @directions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
         super(color)
 
       end
@@ -107,8 +129,9 @@ end
     class King < Piece
       def initialize(color=nil)
         @symbol = color == 'white' ? 'k' : 'k'
-        super(color)
         @range = 1
+        @directions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
+        super(color)
 
       end
     end
