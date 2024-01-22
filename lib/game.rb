@@ -1,4 +1,5 @@
 class Game
+  attr_reader :board, :players
   def initialize(board = Board.new)
     @board = board
     @players = []
@@ -11,8 +12,21 @@ class Game
   puts 'Please, select game mode to continue.'
     loop do
   input = gets.chomp.to_i
-  return two_players_initialize if input.between?(1,2) && input == 1
+  if input.between?(1,2) && input == 1
+    two_players_initialize
+    return play
+  else
     puts 'Please, type proper number to choose gamemode.'
+  end
+    end
+  end
+
+  def play
+    player_move = self.board.player_move
+    player_turn_order = self.board.move_turn_order
+    loop do
+      player_move
+      player_turn_order
     end
   end
 
@@ -32,7 +46,7 @@ class Game
   end
 
   def create_player(input)
-    @players << Player.create_player(input)  
+    @players << Player.create_player(input)
   end
 
   def verify_name(input,taken_names)
@@ -41,4 +55,3 @@ class Game
 
 
 end
-    

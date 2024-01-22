@@ -2,6 +2,7 @@ class Board
   attr_accessor :grid
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
+    @move_order = false
     place_pieces('black')
     place_pieces('white')
   end
@@ -33,6 +34,7 @@ class Board
   end
 
 
+
   def display
     array = []
     @grid.each do |row|
@@ -45,25 +47,25 @@ class Board
         i+=1
       end
     end
-   array.each do |row|
-     puts row.join(' ')
-   end
+    array.each do |row|
+      puts row.join(' ')
+    end
     puts [*('a'..'h')].join(' ').upcase
   end
 
   def player_move
     loop do
-    puts 'Type coordinates to select a piece (For example: 2A)'
-    start = select_coordinate(true)
-    x,y = start
-    piece = @grid[x][y].cell
-    puts 'Type coordinates to select a destination (For example: 3A)'
-    destination = select_coordinate
-     if process_path(piece, start, destination,@grid)
-     return change_squares(piece, start, destination)
-     else
+      puts 'Type coordinates to select a piece (For example: 2A)'
+      start = select_coordinate(true)
+      x,y = start
+      piece = @grid[x][y].cell
+      puts 'Type coordinates to select a destination (For example: 3A)'
+      destination = select_coordinate
+      if process_path(piece, start, destination,@grid)
+        return change_squares(piece, start, destination)
+      else
         puts 'Invalid move. Try again.'
-     end
+      end
     end
   end
 
@@ -83,6 +85,10 @@ class Board
   end
 
 
+  def move_turn_order
+    @move_order = @move_order == false ? true : false
+
+  end
 
 
   def select_coordinate(start_coordinate = false)
@@ -91,12 +97,24 @@ class Board
     verified_coordinates = verify_coordinates(input)
     translated_coordinates = translate_coordinates(verified_coordinates)
     if start_coordinate == false
-      return translated_coordinates if translated_coordinates && start_coordinate == false
+      return translated_coordinates
     else
       is_square_nil = square_not_nil?(translated_coordinates)
-      return is_square_nil if is_square_nil && start_coordinate == true
+      color_correspond = color_correspond_piece?(translated_coordinates)
+      return translated_coordinates if is_square_nil && color_correspond
     end
   end
+  end
+
+  def color_correspond_piece?(piece)
+    x,y = piece
+    piece_color = @grid[x][y].cell.color
+    if (@move_order == false && piece_color == 'white') || (@move_order == true && piece_color == 'black')
+      return true
+    else
+      puts 'You can only choose piece of your own color team!'
+      false
+    end
   end
 
   def square_not_nil?(input)
@@ -106,7 +124,7 @@ class Board
       puts 'You cannot select empty square as start point!'
       return false
     else
-      [x,y]
+    true
     end
   end
 
