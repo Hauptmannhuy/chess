@@ -33,12 +33,11 @@ class Piece
 
         if (new_x).between?(0,7) && (new_y).between?(0,7)
          square_content = table[new_x][new_y]
-         square_content.cell
 
          if square_content == destination_square
-           return true if check_sequence(sequence, empty_square)
-         end
-
+          return true if check_sequence(sequence, empty_square)
+        end
+        sequence<<square_content.cell
         end
 
       end

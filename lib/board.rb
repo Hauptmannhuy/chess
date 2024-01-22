@@ -35,12 +35,9 @@ class Board
 
   def display
     array = []
-    # num = 1
     @grid.each do |row|
       i = 0
       part = []
-      # part << num
-      # num+=1
       row.each do |piece|
         part << '-' if piece.cell == nil
         part << piece.cell.symbol if piece.cell != nil && piece.cell != '-'
