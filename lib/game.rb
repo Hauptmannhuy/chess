@@ -22,12 +22,34 @@ class Game
   end
 
   def play
-    player_move = self.board.player_move
-    player_turn_order = self.board.move_turn_order
     loop do
-      player_move
-      player_turn_order
+      announcment
+      display_board
+      play_round
+      display_board
+      switch_turn
     end
+  end
+
+  def display_board
+    self.board.display
+  end
+
+  def announcment
+    move_order = @board.move_order
+    if move_order == false
+    puts  "White's turn!"
+    else
+    puts  "Black's turn!"
+    end
+  end
+
+  def play_round
+    self.board.player_move
+  end
+
+  def switch_turn
+    self.board.move_turn_order
   end
 
   def two_players_initialize

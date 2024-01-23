@@ -1,5 +1,5 @@
 class Board
-  attr_accessor :grid
+  attr_accessor :grid, :move_order
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
     @move_order = false
@@ -37,9 +37,12 @@ class Board
 
   def display
     array = []
+    n = 1
     @grid.each do |row|
       i = 0
       part = []
+      part << n
+      n+=1
       row.each do |piece|
         part << '-' if piece.cell == nil
         part << piece.cell.symbol if piece.cell != nil && piece.cell != '-'
@@ -50,7 +53,7 @@ class Board
     array.each do |row|
       puts row.join(' ')
     end
-    puts [*('a'..'h')].join(' ').upcase
+    puts ['*',*('a'..'h')].join(' ').upcase
   end
 
   def player_move
@@ -108,7 +111,7 @@ class Board
 
   def color_correspond_piece?(piece)
     x,y = piece
-    piece_color = @grid[x][y].cell.color
+    piece_color = @grid[x][y].cell.color if !@grid[x][y].cell.nil?
     if (@move_order == false && piece_color == 'white') || (@move_order == true && piece_color == 'black')
       return true
     else

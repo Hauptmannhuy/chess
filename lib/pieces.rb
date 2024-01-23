@@ -10,34 +10,39 @@ class Piece
   end
 
   def path_available?(start,destination,table)
-    range = self.range
-    empty_square = nil
+    directions = self.directions
     if self.instance_of?(Knight)
-      knight_moves(start, destination, table, empty_square)
+      knight_moves(start, destination, table)
     else
-     pave_path(start, destination, table, range, empty_square)
+      x,y = destination
+      destination_square = table[x][y]
+      directions = capture_pawn_directions if self.instance_of?(Pawn) && destination_square.cell != nil
+     pave_path(start, destination, destination_square, table, directions)
     end
   end
 
-  def pave_path(start, destination, table, range, empty_square)
+  def capture_pawn_directions
+    return [[1,1],[1,-1]] if self.color == 'white'
+    return [[-1,1],[-1,-1]] if self.color == 'black'
+  end
+
+  def pave_path(start, destination,destination_square, table, directions )
     x,y = start
     i,j = destination
-    destination_square = table[i][j]
-    self.directions = [[1,1],[1,-1]] if self.instance_of?(Pawn) && destination_square.cell != nil
-    sequence = []
 
-    self.directions.each do | dx, dy |
-      sequence = (1..range).map do | i |
+    directions.each do | dx, dy |
+      sequence = []
+      (1..range).map do | i |
         new_x = x+dx*i
         new_y = y+dy*i
 
         if (new_x).between?(0,7) && (new_y).between?(0,7)
-         square_content = table[new_x][new_y]
+         current_square = table[new_x][new_y]
 
-         if square_content == destination_square
-          return true if check_sequence(sequence, empty_square)
+         if current_square == destination_square
+          return true if check_sequence(sequence)
         end
-        sequence<<square_content.cell
+       sequence << current_square.cell
         end
 
       end
@@ -45,7 +50,7 @@ class Piece
     false
     end
 
-    def knight_moves(start,destination, table, empty_square)
+    def knight_moves(start,destination, table)
       x,y = start
       i,j = destination
       destination_square = table[i][j]
@@ -61,8 +66,8 @@ class Piece
       false
     end
 
-    def check_sequence(sequence, empty_square)
-       return true if sequence.all?(empty_square)
+    def check_sequence(sequence)
+       return true if sequence.all?(nil)
     end
 
  def destination_valid?(destination,table)
@@ -79,7 +84,7 @@ end
 
   class Pawn < Piece
     def initialize(color=nil)
-      @directions = [[1,0]]
+      @directions = color == 'white' ? [[1,0]] : [[-1,0]]
       @first_move = true
       @symbol = color == 'white' ? 'p' : 'p'
       super(color)
