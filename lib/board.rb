@@ -79,6 +79,48 @@ class Board
 
   end
 
+  def in_check?
+    king_coordinates = find_king
+    x,y = king_coordinates
+    king_adjacent_squares = @grid[x][y].cell.directions
+    king_adjacent_squares.each do |dx,dy|
+      new_x = x+dx
+      new_y = y+dy
+      if (x+dx).between?(0,7) && (y+dy).between?(0,7)
+        current_square = @grid[new_x][new_y]
+        if current_square.cell.nil?
+        destination = [new_x,new_y]
+        return 'check' if find_vulnerability(destination)
+      end
+    end
+    end
+    puts 'false'
+  end
+
+  def find_vulnerability(destination)
+    friendly_color = @move_order == false ? 'white' : 'black'
+    @grid.each_with_index do |row, x|
+      row.each_with_index do |square,y|
+        if !square.cell.nil? && square.cell.color == friendly_color && !square.cell.instance_of?(King)
+          start = [x,y]
+          piece = square.cell
+         return true if piece.valid_move?(start,destination,@grid)
+        end
+      end
+    end
+    false
+  end
+
+  def find_king
+    enemy_color = @move_order == false ? 'black' : 'white'
+    @grid.each_with_index do |row, x|
+      row.each_with_index do |square,y|
+      return [x,y]  if square.cell.instance_of?(King) && square.cell.color == enemy_color
+      end
+    end
+
+  end
+
   def change_squares(piece, start, destination)
     x,y = start
     i,j = destination

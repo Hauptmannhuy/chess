@@ -38,7 +38,6 @@ class Piece
 
         if (new_x).between?(0,7) && (new_y).between?(0,7)
          current_square = table[new_x][new_y]
-
          if current_square == destination_square
           return true if check_sequence(sequence)
         end
