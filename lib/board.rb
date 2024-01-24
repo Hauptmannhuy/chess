@@ -79,25 +79,23 @@ class Board
 
   end
 
+  def check_mate
+    king_coordinates = find_king
+    x,y = king_coordinates
+    possible_fall_back_squares = @grid[x][y].cell.directions
+    return true if !king_fall_back_possibility && !piece_cover_king
+    false
+  end
+
   def in_check?
     king_coordinates = find_king
     x,y = king_coordinates
-    king_adjacent_squares = @grid[x][y].cell.directions
-    king_adjacent_squares.each do |dx,dy|
-      new_x = x+dx
-      new_y = y+dy
-      if (x+dx).between?(0,7) && (y+dy).between?(0,7)
-        current_square = @grid[new_x][new_y]
-        if current_square.cell.nil?
-        destination = [new_x,new_y]
-        return 'check' if find_vulnerability(destination)
-      end
-    end
-    end
+    destination = [x,y]
+        return 'check' if king_under_attack?(destination)
     puts 'false'
   end
 
-  def find_vulnerability(destination)
+  def king_under_attack?(destination)
     friendly_color = @move_order == false ? 'white' : 'black'
     @grid.each_with_index do |row, x|
       row.each_with_index do |square,y|

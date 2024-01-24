@@ -74,7 +74,6 @@ class Piece
   square = table[x][y].cell
   own_side = self.color
   return true if square == nil
-  return false if square.instance_of?(King)
   return false if square.color == own_side
   true
 end

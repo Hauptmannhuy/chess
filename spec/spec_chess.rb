@@ -44,8 +44,8 @@ describe Board do
     white_pawn = Pawn.new('white')
     black_king = King.new('black')
     table[3][3].cell = black_king
-    table[1][3].cell = white_pawn
-    table[1][3].cell.range = 1
+    table[2][2].cell = white_pawn
+    table[2][2].cell.range = 1
     board.instance_variable_set(:@grid, table)
   end
     it 'returns check' do
@@ -81,7 +81,7 @@ describe Board do
         white_knight = Knight.new('white')
         black_king = King.new('black')
         table[3][3].cell = black_king
-        table[6][1].cell = white_knight
+        table[1][2].cell = white_knight
         board.instance_variable_set(:@grid, table)
       end
         it 'returns check' do
