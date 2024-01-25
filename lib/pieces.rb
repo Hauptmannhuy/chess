@@ -2,7 +2,6 @@ class Piece
   attr_accessor :symbol, :color, :range, :directions
   def initialize(color = nil)
   @color = color
-  @range = 7
   end
 
   def valid_move?(start,destination,table)
@@ -10,14 +9,11 @@ class Piece
   end
 
   def path_available?(start,destination,table)
-    directions = self.directions
+
     if self.instance_of?(Knight)
       knight_moves(start, destination, table)
     else
-      x,y = destination
-      destination_square = table[x][y]
-      directions = capture_pawn_directions if self.instance_of?(Pawn) && destination_square.cell != nil
-     pave_path(start, destination, destination_square, table, directions)
+      pave_path(start, destination, table)
     end
   end
 
@@ -26,10 +22,13 @@ class Piece
     return [[-1,1],[-1,-1]] if self.color == 'black'
   end
 
-  def pave_path(start, destination,destination_square, table, directions )
-    x,y = start
+  def pave_path(start, destination, table )
     i,j = destination
-
+    destination_square = table[i][j]
+    directions = self.directions
+    directions = capture_pawn_directions if self.instance_of?(Pawn) && destination_square.cell != nil
+    x,y = start
+    range = self.range
     directions.each do | dx, dy |
       sequence = []
       (1..range).map do | i |

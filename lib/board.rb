@@ -2,7 +2,8 @@ class Board
   attr_accessor :grid, :move_order
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
-    @move_order = false
+    @move_order = true
+    @check_declared = false
     place_pieces('black')
     place_pieces('white')
   end
@@ -56,6 +57,49 @@ class Board
     puts ['*',*('a'..'h')].join(' ').upcase
   end
 
+  def play_round
+    if @check_declared == true && @move_order == false
+      escape_check('white')
+    elsif @check_declared == true && @move_order == true
+       escape_check('black')
+    else
+       player_move
+    end
+  end
+
+  def cover_king(color)
+    king = find_king(color)
+    x,y = king
+   adjacency_squares = adjacency_squares_king(x,y)
+
+  end
+
+  def adjacency_squares_king(x_coordinate,y_coordinate)
+    directions = @grid[x][y].cell.directions
+
+  end
+
+  def escape_check(color)
+    king_initial_position = find_king(color)
+    x,y = king_initial_position
+    king_piece = @grid[x][y].cell
+    loop do
+      puts 'Select coordinate to withdraw your king!'
+      destination = select_coordinate
+     if king_piece.valid_move?(king_initial_position, destination, @grid)
+      change_squares(king_piece,king_initial_position, destination)
+
+       if !king_under_attack?(destination,color)
+        @check_declared = false
+       return
+       else
+        puts 'Wrong move!'
+        change_squares(king_piece ,destination, king_initial_position)
+       end
+     end
+    end
+  end
+
   def player_move
     loop do
       puts 'Type coordinates to select a piece (For example: 2A)'
@@ -87,19 +131,23 @@ class Board
     false
   end
 
-  def in_check?
-    king_coordinates = find_king
+  def in_check?(king_color = @move_order == false ? 'black' : 'white')
+
+    king_coordinates = find_king(king_color)
     x,y = king_coordinates
     destination = [x,y]
-        return 'check' if king_under_attack?(destination)
-    puts 'false'
+    if king_under_attack?(destination,king_color)
+      @check_declared = true
+      return true
+    end
+     false
   end
 
-  def king_under_attack?(destination)
-    friendly_color = @move_order == false ? 'white' : 'black'
+  def king_under_attack?(destination, king_color)
+    enemy_color = king_color == 'black' ? 'white' : 'black'
     @grid.each_with_index do |row, x|
       row.each_with_index do |square,y|
-        if !square.cell.nil? && square.cell.color == friendly_color && !square.cell.instance_of?(King)
+        if !square.cell.nil? && square.cell.color == enemy_color && !square.cell.instance_of?(King)
           start = [x,y]
           piece = square.cell
          return true if piece.valid_move?(start,destination,@grid)
@@ -109,11 +157,10 @@ class Board
     false
   end
 
-  def find_king
-    enemy_color = @move_order == false ? 'black' : 'white'
+  def find_king(color)
     @grid.each_with_index do |row, x|
       row.each_with_index do |square,y|
-      return [x,y]  if square.cell.instance_of?(King) && square.cell.color == enemy_color
+      return [x,y]  if square.cell.instance_of?(King) && square.cell.color == color
       end
     end
 

@@ -41,15 +41,15 @@ describe Board do
         square.cell = nil
       end
     end
-    white_pawn = Pawn.new('white')
-    black_king = King.new('black')
-    table[3][3].cell = black_king
-    table[2][2].cell = white_pawn
-    table[2][2].cell.range = 1
+    black_pawn = Pawn.new('black')
+    white_king = King.new('white')
+    table[2][2].cell = white_king
+    table[3][3].cell = black_pawn
+    table[3][3].cell.range = 1
     board.instance_variable_set(:@grid, table)
   end
-    it 'returns check' do
-      expect(board.in_check?).to eq('check')
+    it 'returns true' do
+      expect(board.in_check?('white')).to eq(true)
       end
     end
     context 'when king is in danger of attack by rook' do
@@ -60,14 +60,14 @@ describe Board do
             square.cell = nil
           end
         end
-        white_rook = Rook.new('white')
-        black_king = King.new('black')
-        table[3][3].cell = black_king
-        table[7][3].cell = white_rook
+        black_rook = Rook.new('black')
+        white_king = King.new('white')
+        table[3][3].cell = white_king
+        table[7][3].cell = black_rook
         board.instance_variable_set(:@grid, table)
       end
-        it 'returns check' do
-          expect(board.in_check?).to eq('check')
+        it 'returns true' do
+          expect(board.in_check?('white')).to eq(true)
         end
   end
     context "when king is in danger of attack by knight" do
@@ -78,14 +78,14 @@ describe Board do
             square.cell = nil
           end
         end
-        white_knight = Knight.new('white')
-        black_king = King.new('black')
-        table[3][3].cell = black_king
-        table[1][2].cell = white_knight
+        black_knight = Knight.new('black')
+        white_king = King.new('white')
+        table[3][3].cell = white_king
+        table[1][2].cell = black_knight
         board.instance_variable_set(:@grid, table)
       end
-        it 'returns check' do
-          expect(board.in_check?).to eq('check')
+        it 'returns true' do
+          expect(board.in_check?('white')).to eq(true)
         end
     end
     context "when king is in danger of attack by bishop" do
@@ -96,17 +96,38 @@ describe Board do
             square.cell = nil
           end
         end
-        white_bishop = Bishop.new('white')
-        black_king = King.new('black')
-        table[3][3].cell = black_king
+        white_bishop = Bishop.new('black')
+        white_king = King.new('white')
+        table[3][3].cell = white_king
         table[7][7].cell = white_bishop
         board.instance_variable_set(:@grid, table)
       end
-        it 'returns check' do
-          expect(board.in_check?).to eq('check')
+        it 'returns true' do
+          expect(board.in_check?('white')).to eq(true)
         end
     end
     context 'when king is in danger of attack by queen' do
+      before do
+        table = board.instance_variable_get(:@grid)
+        table.each_with_index do |row,x|
+          row.each_with_index do |square,y|
+            square.cell = nil
+          end
+        end
+        white_queen = Queen.new('black')
+        white_king = King.new('white')
+        table[3][3].cell = white_king
+        table[7][7].cell = white_queen
+        board.instance_variable_set(:@grid, table)
+      end
+        it 'returns true' do
+          expect(board.in_check?('white')).to eq(true)
+        end
+    end
+    end
+
+    describe "#escape_check" do
+    context 'when king is in check in user trying escape to wrong coordinate and then to correct coordinate' do
       before do
         table = board.instance_variable_get(:@grid)
         table.each_with_index do |row,x|
@@ -119,10 +140,15 @@ describe Board do
         table[3][3].cell = black_king
         table[7][7].cell = white_queen
         board.instance_variable_set(:@grid, table)
+        allow(board).to receive(:puts)
+        allow(board).to receive(:select_coordinate).and_return([4,3])
+        allow(board).to receive(:find_king).and_return([3,3])
       end
-        it 'returns check' do
-          expect(board.in_check?).to eq('check')
-        end
+      xit 'prints error message and then receives #change_squares' do
+
+
+      board.escape_check
     end
-    end
+  end
+end
 end

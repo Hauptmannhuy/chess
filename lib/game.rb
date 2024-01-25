@@ -27,8 +27,13 @@ class Game
       display_board
       play_round
       display_board
+      in_check?
       switch_turn
     end
+  end
+
+  def in_check?
+    self.board.in_check?
   end
 
   def display_board
@@ -45,7 +50,7 @@ class Game
   end
 
   def play_round
-    self.board.player_move
+    self.board.play_round
   end
 
   def switch_turn
