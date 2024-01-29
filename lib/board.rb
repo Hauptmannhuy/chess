@@ -2,7 +2,7 @@ class Board
   attr_accessor :grid, :move_order
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
-    @move_order = true
+    @move_order = false
     @check_declared = false
     place_pieces('black')
     place_pieces('white')
@@ -67,17 +67,7 @@ class Board
     end
   end
 
-  def cover_king(color)
-    king = find_king(color)
-    x,y = king
-   adjacency_squares = adjacency_squares_king(x,y)
 
-  end
-
-  def adjacency_squares_king(x_coordinate,y_coordinate)
-    directions = @grid[x][y].cell.directions
-
-  end
 
   def escape_check(color)
     king_initial_position = find_king(color)
@@ -123,13 +113,63 @@ class Board
 
   end
 
-  def check_mate
-    king_coordinates = find_king
-    x,y = king_coordinates
-    possible_fall_back_squares = @grid[x][y].cell.directions
-    return true if !king_fall_back_possibility && !piece_cover_king
+  def within_boundaries?(x_coordinate,y_coordinate)
+    return true if (x_coordinate).between?(0,7) && (y_coordinate).between?(0,7)
     false
   end
+
+
+  def king_escape_possible?(color = @move_order == false ? 'black' : 'white')
+    king = find_king(color)
+    x,y = king
+    adjacency_squares = adjacency_squares_king(x,y)
+    adjacency_squares.each do |dx,dy|
+      square = @grid[dx][dy]
+      if square.cell.nil? || square.cell.color != color
+        destination = [dx,dy]
+        start = [x,y]
+        piece = @grid[x][y].cell
+          return true if king_safe?(color,start,destination,piece)
+         end
+      end
+    false
+  end
+
+
+  def king_safe?(color,start,destination,piece)
+    change_squares(piece,start,destination)
+    if !in_check?(color)
+      change_squares(piece,destination,start)
+      true
+    else
+      change_squares(piece,destination,start)
+      false
+    end
+
+  end
+
+
+  def adjacency_squares_king(x_coordinate,y_coordinate)
+    array = []
+    directions = @grid[x_coordinate][y_coordinate].cell.directions
+    directions.each do |dx,dy|
+      new_x = x_coordinate+dx
+      new_y = y_coordinate+dy
+      if within_boundaries?(new_x,new_y)
+        square = @grid[new_x][new_y]
+       array << [new_x,new_y] if square.cell.nil?
+      end
+    end
+    array.empty? ? false : array
+  end
+
+  # def check_mate
+  #   king_coordinates = find_king
+  #   x,y = king_coordinates
+  #   possible_fall_back_squares = @grid[x][y].cell.directions
+  #   return true if !king_fall_back_possibility && !piece_cover_king
+  #   false
+  # end
 
   def in_check?(king_color = @move_order == false ? 'black' : 'white')
 
@@ -232,6 +272,15 @@ class Board
       puts 'Error! Select correct value.'
       input = gets.chomp.downcase.split('')
     end
+  end
+
+  def test
+    @grid.each_with_index do |row,x|
+      row.each_with_index do |square,y|
+        square.cell = nil
+      end
+    end
+
   end
 
 end

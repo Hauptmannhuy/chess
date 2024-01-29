@@ -127,7 +127,7 @@ describe Board do
     end
 
     describe "#escape_check" do
-    context 'when king is in check in user trying escape to wrong coordinate and then to correct coordinate' do
+    context 'when black king is in check and user is trying to escape to correct coordinate' do
       before do
         table = board.instance_variable_get(:@grid)
         table.each_with_index do |row,x|
@@ -140,15 +140,148 @@ describe Board do
         table[3][3].cell = black_king
         table[7][7].cell = white_queen
         board.instance_variable_set(:@grid, table)
+        board.instance_variable_set(:@check_declared, true)
         allow(board).to receive(:puts)
-        allow(board).to receive(:select_coordinate).and_return([4,3])
         allow(board).to receive(:find_king).and_return([3,3])
+        allow(board).to receive(:select_coordinate).and_return([4,3])
       end
-      xit 'prints error message and then receives #change_squares' do
+      it 'changes instance variable @check_declared to false and completes loop' do
+      expect{board.escape_check('black')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
 
-
-      board.escape_check
     end
   end
+  context 'when black king is in check and user is trying to escape to correct incorrect coordinate and then to correct coordinate' do
+    before do
+      table = board.instance_variable_get(:@grid)
+      table.each_with_index do |row,x|
+        row.each_with_index do |square,y|
+          square.cell = nil
+        end
+      end
+      white_queen = Queen.new('white')
+      black_king = King.new('black')
+      table[3][3].cell = black_king
+      table[7][7].cell = white_queen
+      board.instance_variable_set(:@grid, table)
+      board.instance_variable_set(:@check_declared, true)
+      allow(board).to receive(:puts)
+      allow(board).to receive(:find_king).and_return([3,3])
+      allow(board).to receive(:select_coordinate).and_return([2,2],[4,3])
+    end
+    it 'prints error message once and then changes instance variable @check_declared to false and completes loop' do
+      error_message = 'Wrong move!'
+    expect(board).to receive(:puts).with(error_message).once
+    expect{board.escape_check('black')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
+
+  end
 end
+context 'when white king is in check and user is trying to escape to correct coordinate' do
+  before do
+    table = board.instance_variable_get(:@grid)
+    table.each_with_index do |row,x|
+      row.each_with_index do |square,y|
+        square.cell = nil
+      end
+    end
+    black_queen = Queen.new('black')
+    white_king = King.new('white')
+    table[3][3].cell = white_king
+    table[7][7].cell = black_queen
+    board.instance_variable_set(:@grid, table)
+    board.instance_variable_set(:@check_declared, true)
+    allow(board).to receive(:puts)
+    allow(board).to receive(:find_king).and_return([3,3])
+    allow(board).to receive(:select_coordinate).and_return([4,3])
+  end
+  it 'prints error message once and then changes instance variable @check_declared to false and completes loop' do
+  expect{board.escape_check('white')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
+end
+end
+context 'when white king is in check and user is trying to escape to correct incorrect coordinate and then to correct coordinate' do
+  before do
+    table = board.instance_variable_get(:@grid)
+    table.each_with_index do |row,x|
+      row.each_with_index do |square,y|
+        square.cell = nil
+      end
+    end
+    black_queen = Queen.new('black')
+    white_king = King.new('white')
+    table[3][3].cell = white_king
+    table[7][7].cell = black_queen
+    board.instance_variable_set(:@grid, table)
+    board.instance_variable_set(:@check_declared, true)
+    allow(board).to receive(:puts)
+    allow(board).to receive(:find_king).and_return([3,3])
+    allow(board).to receive(:select_coordinate).and_return([2,2],[4,3])
+  end
+  it 'changes instance variable @check_declared to false and completes loop' do
+    error_message = 'Wrong move!'
+    expect(board).to receive(:puts).with(error_message).once
+  expect{board.escape_check('white')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
+end
+end
+end
+
+  describe '#king_escape_possible?' do
+    context 'when king is in danger of be taken by enemy queen but has escape routes' do
+      before do
+        table = board.instance_variable_get(:@grid)
+        table.each_with_index do |row,x|
+          row.each_with_index do |square,y|
+            square.cell = nil
+          end
+        end
+        black_queen = Queen.new('black')
+        white_king = King.new('white')
+        table[3][3].cell = white_king
+        table[7][7].cell = black_queen
+        board.instance_variable_set(:@grid, table)
+        board.instance_variable_set(:@check_declared, true)
+      end
+      it 'completes iteration and returns true' do
+        expect(board.king_escape_possible?('white')).to eq(true)
+      end
+    end
+    context 'when king is in danger of be taken by two enemy rooks and has no escape routes' do
+      before do
+        table = board.instance_variable_get(:@grid)
+        table.each_with_index do |row,x|
+          row.each_with_index do |square,y|
+            square.cell = nil
+          end
+        end
+        black_rook_1 = Rook.new('black')
+        black_rook_2 = Rook.new('black')
+        white_king = King.new('white')
+        table[0][0].cell = white_king
+        table[1][7].cell = black_rook_1
+        table[0][7].cell = black_rook_2
+        board.instance_variable_set(:@grid, table)
+      end
+      it 'completes iteration and returns false' do
+        expect(board.king_escape_possible?('white')).to eq(false)
+      end
+    end
+  end
+
+  describe '#king_cover_possible?' do
+    context 'when check is declared and king is in danger of taken by enemy rook and friendly piece nearby can cover king' do
+      before do
+        table = board.instance_variable_get(:@grid)
+        table.each_with_index do |row,x|
+          row.each_with_index do |square,y|
+            square.cell = nil
+          end
+        end
+        black_rook_1 = Rook.new('black')
+        black_rook_2 = Rook.new('black')
+        white_king = King.new('white')
+        table[0][0].cell = white_king
+        table[1][7].cell = black_rook_1
+        table[0][7].cell = black_rook_2
+        board.instance_variable_set(:@grid, table)
+      end
+    end
+  end
 end
