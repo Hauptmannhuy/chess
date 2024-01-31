@@ -8,6 +8,7 @@ class Board
     place_pieces('white')
   end
 
+
   def place_pieces(color)
   place_first_line(color)
   place_second_line(color)
@@ -136,6 +137,80 @@ class Board
   end
 
 
+  def piece_defend_king_possible?(color = @move_order == false ? 'black' : 'white')
+    king = find_king(color)
+    x,y = king
+    vulnerable_directions = possible_directions(x,y)
+    return false if vulnerable_directions.nil?
+    vulnerable_directions.each do |dx,dy|
+      destination = [dx,dy]
+      return true if process_piece_defence_king(color,destination)
+    end
+    false
+  end
+
+  def process_piece_defence_king(color,destination)
+    @grid.each_with_index do |row,x|
+      row.each_with_index do |square, y|
+        if !square.cell.nil? && square.cell.color == color && !square.cell.instance_of?(King)
+          start = [x,y]
+          piece = square.cell
+          if piece.valid_move?(start,destination,@grid)
+            return true if king_safe?(color,start,destination,piece)
+          end
+        end
+      end
+    end
+    false
+  end
+
+
+  def possible_directions(x,y)
+    king_piece = @grid[x][y].cell
+    king_coordinate = [x,y]
+    directions = king_piece.directions
+    sequences = []
+    directions.each do | dx, dy |
+      squares_iterated = iterate_squares(dx,dy,king_piece,king_coordinate)
+      sequences << squares_iterated
+    end
+    knight_directions = knight_directions(king_coordinate)
+    output = sequences.compact.flatten(1).concat(knight_directions)
+  end
+
+  def iterate_squares(dx,dy,king,king_coordinate)
+    x,y = king_coordinate
+    sequence = []
+    (1..7).each do |step|
+      new_x = x+dx*step
+      new_y = y+dy*step
+      if within_boundaries?(new_x,new_y)
+        square = @grid[new_x][new_y]
+        return nil if !square.cell.nil? && square.cell.color == king.color
+        if !square.cell.nil? && square.cell.color != king.color
+          sequence << [new_x,new_y]
+          return sequence
+        end
+        sequence << [new_x,new_y]
+      end
+    end
+    nil
+  end
+
+  def knight_directions(king_coords)
+    array = []
+    x,y = king_coords
+    knight_coords = [[2,1],[2,-1],[-1,-2],[1,-2],[-2,-1],[-2,1],[1,2],[-1,2]]
+    knight_coords.each do |dx, dy|
+      new_x = x+dx
+      new_y = y+dy
+      if within_boundaries?(new_x,new_y)
+        array << [new_x,new_y]
+      end
+    end
+    array
+  end
+
   def king_safe?(color,start,destination,piece)
     change_squares(piece,start,destination)
     if !in_check?(color)
@@ -147,7 +222,6 @@ class Board
     end
 
   end
-
 
   def adjacency_squares_king(x_coordinate,y_coordinate)
     array = []
@@ -167,7 +241,7 @@ class Board
   #   king_coordinates = find_king
   #   x,y = king_coordinates
   #   possible_fall_back_squares = @grid[x][y].cell.directions
-  #   return true if !king_fall_back_possibility && !piece_cover_king
+  #   return true if !king_fall_back_possibility && !process_piece_defence_king
   #   false
   # end
 
@@ -209,9 +283,9 @@ class Board
   def change_squares(piece, start, destination)
     x,y = start
     i,j = destination
-    empty_square = nil
+    replacing_square = @grid[i][j].cell
     @grid[i][j].cell = piece
-    @grid[x][y].cell = empty_square
+    @grid[x][y].cell = replacing_square
   end
 
 
@@ -274,14 +348,13 @@ class Board
     end
   end
 
-  def test
+  def clean_board
     @grid.each_with_index do |row,x|
       row.each_with_index do |square,y|
         square.cell = nil
       end
     end
-
-  end
+end
 
 end
 
