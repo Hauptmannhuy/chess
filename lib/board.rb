@@ -15,20 +15,23 @@ class Board
   def place_first_line(color)
     y = color == 'white' ? 1 : 6
     x = 0
-    pawn = Pawn.new(color)
     while x != 8 do
+      pawn = Pawn.new(color)
       @grid[y][x].cell = pawn
       x+=1
     end
   end
 
   def place_second_line(color)
-    rook = Rook.new(color)
-    bishop = Bishop.new(color)
-    knight = Knight.new(color)
+    rook_1 = Rook.new(color)
+    rook_2 = Rook.new(color)
+    bishop_1 = Bishop.new(color)
+    bishop_2 = Bishop.new(color)
+    knight_1 = Knight.new(color)
+    knight_2 = Knight.new(color)
     queen = Queen.new(color)
     king = King.new(color)
-    line = [rook, knight, bishop, queen, king, bishop, knight, rook]
+    line = [rook_1, knight_1, bishop_1, queen, king, bishop_2, knight_2, rook_2]
     y = color == 'white' ? 0 : 7
     8.times{|i| @grid[y][i].cell = line[i]}
   end
@@ -98,6 +101,7 @@ class Board
       puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
       if process_path(piece, start, destination,@grid)
+        piece.change_pawn_range if piece.instance_of?(Pawn)
         return change_squares(piece, start, destination)
       else
         puts 'Invalid move. Try again.'

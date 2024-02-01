@@ -5,7 +5,8 @@ class Piece
   end
 
   def valid_move?(start,destination,table)
-    return true if destination_valid?(destination,table) && path_available?(start,destination,table)
+   return true if destination_valid?(destination,table) && path_available?(start,destination,table)
+   false
   end
 
   def path_available?(start,destination,table)
@@ -25,10 +26,10 @@ class Piece
   def pave_path(start, destination, table )
     i,j = destination
     destination_square = table[i][j]
-    directions = self.directions
-    directions = capture_pawn_directions if self.instance_of?(Pawn) && destination_square.cell != nil
     x,y = start
     range = self.range
+    directions = self.instance_of?(Pawn) && !destination_square.cell.nil? ? capture_pawn_directions : self.directions
+
     directions.each do | dx, dy |
       sequence = []
       (1..range).map do | i |
@@ -56,7 +57,7 @@ class Piece
       self.directions.each do | dx, dy |
         new_x = x+dx
         new_y = y+dy
-        if (x+dx).between?(0,7) && (y+dy).between?(0,7)
+        if (new_x).between?(0,7) && (new_y).between?(0,7)
         square = table[new_x][new_y]
             return true if square == destination_square
           end
@@ -67,6 +68,8 @@ class Piece
     def check_sequence(sequence)
        return true if sequence.all?(nil)
     end
+
+
 
  def destination_valid?(destination,table)
   x,y = destination
@@ -80,12 +83,18 @@ end
 end
 
   class Pawn < Piece
+    attr_accessor :first_move, :range
     def initialize(color=nil)
       @directions = color == 'white' ? [[1,0]] : [[-1,0]]
       @first_move = true
       @symbol = color == 'white' ? 'p' : 'p'
       super(color)
       @range = @first_move == true ? 2 : 1
+    end
+
+    def change_pawn_range
+      self.range = 1
+      self.first_move = false
     end
   end
 
