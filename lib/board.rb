@@ -4,8 +4,6 @@ class Board
     @grid = Array.new(8) { Array.new(8){ Square.new } }
     @move_order = false
     @check_declared = false
-    place_pieces('black')
-    place_pieces('white')
   end
 
 

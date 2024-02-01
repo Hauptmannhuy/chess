@@ -5,7 +5,14 @@ class Game
     @players = []
   end
 
-  def start
+  def self.start
+    game = Game.new
+    game.board.place_pieces('black')
+    game.board.place_pieces('white')
+    game.introduction
+  end
+
+  def introduction
   puts 'Welcome to chess game!'
   puts 'Human vs Human (press 1)'
   puts 'Human vs computer (press 2)'
