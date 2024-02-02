@@ -125,7 +125,8 @@ class Board
   def king_escape_possible?(color = @move_order == false ? 'black' : 'white')
     king = find_king(color)
     x,y = king
-    adjacency_squares = adjacency_squares_king(x,y)
+    adjacency_squares = adjacency_squares_king(x,y,color)
+    return false if adjacency_squares.empty?
     adjacency_squares.each do |dx,dy|
       square = @grid[dx][dy]
       if square.cell.nil? || square.cell.color != color
@@ -202,7 +203,7 @@ class Board
   def knight_directions(king_coords)
     array = []
     x,y = king_coords
-    knight_coords = [[2,1],[2,-1],[-1,-2],[1,-2],[-2,-1],[-2,1],[1,2],[-1,2]]
+    knight_coords = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
     knight_coords.each do |dx, dy|
       new_x = x+dx
       new_y = y+dy
@@ -214,18 +215,20 @@ class Board
   end
 
   def king_safe?(color,start,destination,piece)
+    x,y = destination
+    replacing_square = @grid[x][y].cell
     change_squares(piece,start,destination)
     if !in_check?(color)
-      change_squares(piece,destination,start)
+      change_squares(piece,destination,start,replacing_square)
       true
     else
-      change_squares(piece,destination,start)
+      change_squares(piece,destination,start,replacing_square)
       false
     end
 
   end
 
-  def adjacency_squares_king(x_coordinate,y_coordinate)
+  def adjacency_squares_king(x_coordinate,y_coordinate,color)
     array = []
     directions = @grid[x_coordinate][y_coordinate].cell.directions
     directions.each do |dx,dy|
@@ -233,19 +236,16 @@ class Board
       new_y = y_coordinate+dy
       if within_boundaries?(new_x,new_y)
         square = @grid[new_x][new_y]
-       array << [new_x,new_y] if square.cell.nil?
+       array << [new_x,new_y] if square.cell.nil? || (!square.cell.nil? && color != square.cell.color)
       end
     end
-    array.empty? ? false : array
+    array
   end
 
-  # def check_mate
-  #   king_coordinates = find_king
-  #   x,y = king_coordinates
-  #   possible_fall_back_squares = @grid[x][y].cell.directions
-  #   return true if !king_fall_back_possibility && !process_piece_defence_king
-  #   false
-  # end
+  def check_mate(color = @move_order == false ? 'black' : 'white')
+    return true if !piece_defend_king_possible?(color) && !king_escape_possible?(color)
+    false
+  end
 
   def in_check?(king_color = @move_order == false ? 'black' : 'white')
 
@@ -263,7 +263,7 @@ class Board
     enemy_color = king_color == 'black' ? 'white' : 'black'
     @grid.each_with_index do |row, x|
       row.each_with_index do |square,y|
-        if !square.cell.nil? && square.cell.color == enemy_color && !square.cell.instance_of?(King)
+        if !square.cell.nil? && square.cell.color == enemy_color
           start = [x,y]
           piece = square.cell
          return true if piece.valid_move?(start,destination,@grid)
@@ -282,12 +282,11 @@ class Board
 
   end
 
-  def change_squares(piece, start, destination)
+  def change_squares(piece, start, destination, square_to_replace = nil)
     x,y = start
     i,j = destination
-    replacing_square = @grid[i][j].cell
     @grid[i][j].cell = piece
-    @grid[x][y].cell = replacing_square
+    @grid[x][y].cell = square_to_replace
   end
 
 

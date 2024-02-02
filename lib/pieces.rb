@@ -119,7 +119,7 @@ end
 
     class Knight < Piece
       def initialize(color=nil)
-        @directions = [[2,1],[2,-1],[-1,-2],[1,-2],[-2,-1],[-2,1],[1,2],[-1,2]]
+        @directions = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
         @symbol = color == 'white' ? 'n' : 'n'
         super(color)
 

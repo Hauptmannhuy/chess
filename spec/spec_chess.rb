@@ -27,7 +27,25 @@ describe Piece do
         expect(piece.valid_move?(start,destination,table)).to eq(true)
       end
     end
+    context 'when pawn already made his first move and user is trying to jump over two squares' do
+      it 'returns false' do
+        piece = Pawn.new('white')
+        piece.change_pawn_range
+        table[0][0] = piece
+        start = [0,0]
+        destination = [2,0]
+        expect(piece.valid_move?(start,destination,table)).to eq(false)
+      end
+    end
   end
+  end
+  describe '#change_pawn_range' do
+    context 'when pawn makes his first move' do
+      it 'changes attribute range from 2 to 1' do
+        piece = Pawn.new('white')
+        expect{piece.change_pawn_range}.to change{piece.instance_variable_get(:@range)}.from(2).to(1)
+      end
+    end
   end
 end
 
@@ -252,5 +270,155 @@ end
       end
   end
 
-
+  describe "#check_mate" do
+    context 'when king in position 1A covered by two enemy rooks on 1H and 2H' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[0][0].cell = King.new('white')
+        table[1][7].cell = Rook.new('black')
+        table[0][7].cell = Rook.new('black')
+        expect(board.check_mate('white')).to eq(true)
+      end
+    end
+    context 'when king in position 8H surrounded by enemy rook and knight' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][7].cell = King.new('white')
+        table[6][7].cell = Rook.new('black')
+        table[5][5].cell = Knight.new('black')
+        expect(board.check_mate('white')).to eq(true)
+      end
+    end
+    context 'Epaulette mate' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][4].cell = King.new('white')
+        table[7][5].cell = Rook.new('white')
+        table[7][3].cell = Rook.new('white')
+        table[5][4].cell = Queen.new('black')
+        expect(board.check_mate('white')).to eq(true)
+      end
+    end
+    context 'Arabian mate' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][7].cell = King.new('black')
+        table[7][6].cell = Rook.new('white')
+        table[5][5].cell = Knight.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context 'Queen mate' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][3].cell = King.new('black')
+        table[6][3].cell = Queen.new('white')
+        table[5][3].cell = King.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context 'Rook mate (box mate)' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][3].cell = King.new('black')
+        table[7][0].cell = Rook.new('white')
+        table[5][3].cell = King.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context 'Smothered mate' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][7].cell = King.new('black')
+        table[7][6].cell = Rook.new('black')
+        table[6][6].cell = Pawn.new('black')
+        table[6][7].cell = Pawn.new('black')
+        table[6][5].cell = Knight.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context "Swallow's tail mate (guéridon mate)" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[6][4].cell = King.new('black')
+        table[7][3].cell = Rook.new('black')
+        table[7][5].cell = Rook.new('black')
+        table[5][4].cell = Queen.new('white')
+        table[5][0].cell = Rook.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context 'Triangle mate' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][3].cell = Rook.new('white')
+        table[5][3].cell = Queen.new('white')
+        table[6][4].cell = King.new('black')
+        table[6][5].cell = Pawn.new('black')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context "Morphy's mate" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][7].cell = King.new('black')
+        table[6][7].cell = Pawn.new('black')
+        table[0][6].cell = Rook.new('white')
+        table[5][5].cell = Bishop.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context "Lolli's mate" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][6].cell = King.new('black')
+        table[6][6].cell = Queen.new('white')
+        table[6][5].cell = Pawn.new('black')
+        table[5][5].cell = Pawn.new('white')
+        table[5][6].cell = Pawn.new('black')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context "Max Lange's mate" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][6].cell = Queen.new('white')
+        table[6][6].cell = Pawn.new('black')
+        table[6][5].cell = Bishop.new('white')
+        table[5][7].cell = Pawn.new('black')
+        table[6][7].cell = King.new('black')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context "Hook mate" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        table[7][4].cell = Rook.new('white')
+        table[6][4].cell = King.new('black')
+        table[6][5].cell = Pawn.new('black')
+        table[5][5].cell = Knight.new('white')
+        table[4][4].cell = Pawn.new('white')
+        expect(board.check_mate('black')).to eq(true)
+      end
+    end
+    context 'when king in position 4D surrounded by enemy pieces but has escape route' do
+      it 'returns false' do
+        table = board.instance_variable_get(:@grid)
+        table[3][3].cell = King.new('white')
+        table[3][2].cell = Rook.new('black')
+        table[4][3].cell = Bishop.new('black')
+        table[3][4].cell = Knight.new('black')
+        expect(board.check_mate('white')).to eq(false)
+      end
+    end
+    context 'when king in position 4D and enemy pawn and Queen attack but king has escape route' do
+            it 'returns false' do
+              table = board.instance_variable_get(:@grid)
+              table[3][3].cell = King.new('white')
+              table[4][2].cell = Pawn.new('black')
+              table[7][7].cell = Queen.new('black')
+              expect(board.check_mate('white')).to eq(false)
+           end
+    end
+  end
 end
