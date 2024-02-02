@@ -65,10 +65,9 @@ class Board
     elsif @check_declared == true && @move_order == true
        escape_check('black')
     else
-       player_move
+       choose_coordinates
     end
   end
-
 
 
   def escape_check(color)
@@ -92,28 +91,37 @@ class Board
     end
   end
 
-  def player_move
-    loop do
+  def choose_coordinates
       puts 'Type coordinates to select a piece (For example: 2A)'
       start = select_coordinate(true)
-      x,y = start
-      piece = @grid[x][y].cell
       puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
+      return indetify_move(start,destination)
+end
+
+  def indetify_move(start,destination)
+    x,y = start
+    i,j = destination
+    start_piece = @grid[x][y].cell
+    destination_piece = @grid[i][j].cell
+    # return castling_move if castle_move_identified?
+    standard_move(start,destination)
+  end
+
+  def standard_move(start,destination)
+      x,y = start
+      piece = @grid[x][y].cell
       if process_path(piece, start, destination,@grid)
         piece.change_pawn_range if piece.instance_of?(Pawn)
         return change_squares(piece, start, destination)
       else
         puts 'Invalid move. Try again.'
-      end
+        return choose_coordinates
     end
   end
 
   def process_path(piece, start, destination,board)
-
     piece.valid_move?(start,destination,board)
-
-
   end
 
   def within_boundaries?(x_coordinate,y_coordinate)
@@ -349,13 +357,13 @@ class Board
     end
   end
 
-  def clean_board
-    @grid.each_with_index do |row,x|
-      row.each_with_index do |square,y|
-        square.cell = nil
-      end
-    end
-end
+#   def clean_board
+#     @grid.each_with_index do |row,x|
+#       row.each_with_index do |square,y|
+#         square.cell = nil
+#       end
+#     end
+# end
 
 end
 
