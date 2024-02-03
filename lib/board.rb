@@ -100,11 +100,7 @@ class Board
 end
 
   def indetify_move(start,destination)
-    x,y = start
-    i,j = destination
-    start_piece = @grid[x][y].cell
-    destination_piece = @grid[i][j].cell
-    return true if castling_move_identified?
+    return castling_move if castling_move_identified?(start,destination)
     standard_move(start,destination)
   end
 
@@ -120,25 +116,58 @@ end
     end
   end
 
-  def castling_move(start,destination)
-    squares = extract_castling_path(start,destination)
-  end
-
-  def extract_castling_path(start,destination)
-    array = []
+  def castling_move(start, destination)
     x,y = start
     i,j = destination
-    if @grid[x][y].cell.color == 'white'
-      case j
-      in 0 then [@grid[0][1].cell,@grid[0][2].cell,@grid[0][3].cell]
-      in 7 then [@grid[0][5].cell,@grid[0][6].cell]
-      end
+    start_piece = @grid[x][y].cell
+    dest_piece = @grid[i][j].cell
+    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination)
+    return change_squares(start_piece,start,destination,dest_piece)
     else
-      case j
-      in 0 then [@grid[7][1].cell,@grid[7][2].cell,@grid[7][3].cell]
-      in 7 then [@grid[7][5].cell,@grid[7][6].cell]
-      end
+      choose_coordinates
     end
+  end
+
+  def pieces_meet_castling_criteria?(start, destination)
+      i,j = destination
+      x,y = start
+      start_position = @grid[x][y].cell
+      destination_position = @grid[i][j].cell
+      return true if (start_position.instance_of?(King) && start_position.first_move == true) && (destination_position.instance_of?(Rook) && destination_position.first_move == true)
+      false
+  end
+
+
+  def castling_move_legit?(start,destination)
+    color = @grid[start[0]][start[1]].cell.color
+    squares = extract_castling_path(start,destination)
+    return false if !check_castling_path(squares)
+    squares.each do |square|
+      return false if square_under_enemy_attack?(square,color)
+    end
+    true
+  end
+
+  def check_castling_path(squares)
+    return false if squares.any?{|x,y| @grid[x][y].cell != nil }
+    true
+  end
+
+
+  def extract_castling_path(start,destination)
+    x,y = start
+    column = destination[1]
+    if @grid[x][y].cell.color == 'white'
+      case column
+      in 0 then [[0,1],[0,2],[0,3]]
+      in 7 then [[0,5],[0,6]]
+      end
+      else
+      case column
+      in 0 then [[7,1],[7,2],[7,3]]
+      in 7 then [[7,5],[7,6]]
+      end
+      end
   end
 
 
@@ -218,7 +247,7 @@ end
       sequences << squares_iterated
     end
     knight_directions = knight_directions(king_coordinate)
-    output = sequences.compact.flatten(1).concat(knight_directions)
+   sequences.compact.flatten(1).concat(knight_directions)
   end
 
   def iterate_squares(dx,dy,king,king_coordinate)
