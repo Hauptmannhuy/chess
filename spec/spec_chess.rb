@@ -52,6 +52,19 @@ end
 describe Board do
   let(:board){ described_class.new }
 
+  describe '#castling_move_identified?' do
+    context 'When start square is white king and destination is white rook' do
+      it 'returns true' do
+        table =  board.instance_variable_get(:@grid)
+        table[0][0].cell = King.new('white')
+        table[0][3].cell = Rook.new('white')
+        start = [0,0]
+        dest = [0,3]
+        expect(board.castling_move_identified?(start,dest)).to eq(true)
+      end
+    end
+  end
+
   describe '#in_check?' do
 
 

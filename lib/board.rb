@@ -80,7 +80,7 @@ class Board
      if king_piece.valid_move?(king_initial_position, destination, @grid)
       change_squares(king_piece,king_initial_position, destination)
 
-       if !king_under_attack?(destination,color)
+       if !square_under_enemy_attack?(destination,color)
         @check_declared = false
        return
        else
@@ -104,7 +104,7 @@ end
     i,j = destination
     start_piece = @grid[x][y].cell
     destination_piece = @grid[i][j].cell
-    # return castling_move if castle_move_identified?
+    return true if castling_move_identified?
     standard_move(start,destination)
   end
 
@@ -118,6 +118,38 @@ end
         puts 'Invalid move. Try again.'
         return choose_coordinates
     end
+  end
+
+  def castling_move(start,destination)
+    squares = extract_castling_path(start,destination)
+  end
+
+  def extract_castling_path(start,destination)
+    array = []
+    x,y = start
+    i,j = destination
+    if @grid[x][y].cell.color == 'white'
+      case j
+      in 0 then [@grid[0][1].cell,@grid[0][2].cell,@grid[0][3].cell]
+      in 7 then [@grid[0][5].cell,@grid[0][6].cell]
+      end
+    else
+      case j
+      in 0 then [@grid[7][1].cell,@grid[7][2].cell,@grid[7][3].cell]
+      in 7 then [@grid[7][5].cell,@grid[7][6].cell]
+      end
+    end
+  end
+
+
+  def castling_move_identified?(start,destination)
+    x,y = start
+    i,j = destination
+    start_piece = @grid[x][y].cell
+    dest_piece = @grid[i][j].cell
+    friendly_color = start_piece.color
+    return true if start_piece.instance_of?(King) && (dest_piece.instance_of?(Rook) && dest_piece.color == friendly_color)
+    false
   end
 
   def process_path(piece, start, destination,board)
@@ -260,14 +292,14 @@ end
     king_coordinates = find_king(king_color)
     x,y = king_coordinates
     destination = [x,y]
-    if king_under_attack?(destination,king_color)
+    if square_under_enemy_attack?(destination,king_color)
       @check_declared = true
       return true
     end
      false
   end
 
-  def king_under_attack?(destination, king_color)
+  def square_under_enemy_attack?(destination, king_color)
     enemy_color = king_color == 'black' ? 'white' : 'black'
     @grid.each_with_index do |row, x|
       row.each_with_index do |square,y|
