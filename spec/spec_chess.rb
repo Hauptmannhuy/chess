@@ -30,7 +30,7 @@ describe Piece do
     context 'when pawn already made his first move and user is trying to jump over two squares' do
       it 'returns false' do
         piece = Pawn.new('white')
-        piece.change_pawn_range
+        piece.change_attribute_of_piece
         table[0][0] = piece
         start = [0,0]
         destination = [2,0]
@@ -39,11 +39,11 @@ describe Piece do
     end
   end
   end
-  describe '#change_pawn_range' do
+  describe '#change_attribute_of_piece' do
     context 'when pawn makes his first move' do
       it 'changes attribute range from 2 to 1' do
         piece = Pawn.new('white')
-        expect{piece.change_pawn_range}.to change{piece.instance_variable_get(:@range)}.from(2).to(1)
+        expect{piece.change_attribute_of_piece}.to change{piece.instance_variable_get(:@range)}.from(2).to(1)
       end
     end
   end
@@ -433,5 +433,71 @@ end
               expect(board.check_mate('white')).to eq(false)
            end
     end
+  end
+  describe '#castling_move' do
+    context "when colors of pieces correspond to conditions, didn't make any moves and path not under attack, neither the king" do
+      it 'calls #change_squares' do
+      table = board.instance_variable_get(:@grid)
+      table[0][4].cell = King.new('white')
+      table[0][7].cell = Rook.new('white')
+      start = [0,4]
+      dest = [0,7]
+      expect(board).to receive(:change_squares)
+      board.castling_move(start,dest)
+      end
+    end
+    context "when colors of pieces don't correspond to conditions, didn't make any moves and path not under attack, neither the king" do
+    it 'calls #choose_coordinates' do
+    allow(board).to receive(:puts)
+
+    table = board.instance_variable_get(:@grid)
+    table[0][4].cell = King.new('black')
+    table[0][7].cell = Rook.new('white')
+    start = [0,4]
+    dest = [0,7]
+    expect(board).to receive(:choose_coordinates)
+    board.castling_move(start,dest)
+    end
+  end
+  context "when colors of pieces correspond to conditions, but already made moves and path not under attack, neither the king" do
+    it 'calls #choose_coordinates' do
+    allow(board).to receive(:puts)
+
+    table = board.instance_variable_get(:@grid)
+    table[0][4].cell = King.new('white')
+    table[0][7].cell = Rook.new('white')
+    table[0][7].cell.first_move = false
+    start = [0,4]
+    dest = [0,7]
+    expect(board).to receive(:choose_coordinates)
+    board.castling_move(start,dest)
+    end
+  end
+  context "when colors of pieces correspond to conditions, didn't make any moves, but path under attack" do
+    it 'calls #choose_coordinates' do
+    allow(board).to receive(:puts)
+    table = board.instance_variable_get(:@grid)
+    table[0][4].cell = King.new('white')
+    table[0][7].cell = Rook.new('white')
+    table[4][5].cell = Rook.new('black')
+    start = [0,4]
+    dest = [0,7]
+    expect(board).to receive(:choose_coordinates)
+    board.castling_move(start,dest)
+    end
+  end
+  context "when king is in check" do
+    it 'calls #choose_coordinates' do
+    allow(board).to receive(:puts)
+    table = board.instance_variable_get(:@grid)
+    table[0][4].cell = King.new('white')
+    table[0][7].cell = Rook.new('white')
+    table[4][4].cell = Rook.new('black')
+    start = [0,4]
+    dest = [0,7]
+    expect(board).to receive(:choose_coordinates)
+    board.castling_move(start,dest)
+    end
+  end
   end
 end

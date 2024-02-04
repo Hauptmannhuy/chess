@@ -108,7 +108,7 @@ end
       x,y = start
       piece = @grid[x][y].cell
       if process_path(piece, start, destination,@grid)
-        piece.change_pawn_range if piece.instance_of?(Pawn)
+        piece.change_attribute_of_piece if piece_first_move?(piece)
         return change_squares(piece, start, destination)
       else
         puts 'Invalid move. Try again.'
@@ -116,14 +116,22 @@ end
     end
   end
 
+  def piece_first_move?(piece)
+    if piece.instance_of?(Pawn) || piece.instance_of?(Rook) || piece.instance_of?(King)
+      return true if piece.first == true
+    end
+    false
+  end
+
   def castling_move(start, destination)
     x,y = start
     i,j = destination
-    start_piece = @grid[x][y].cell
-    dest_piece = @grid[i][j].cell
-    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination)
-    return change_squares(start_piece,start,destination,dest_piece)
+    king_piece = @grid[x][y].cell
+    rook_piece = @grid[i][j].cell
+    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, king_piece.color)
+     change_squares(king_piece,start,destination,rook_piece)
     else
+      puts 'Invalid move. Try again.'
       choose_coordinates
     end
   end
@@ -174,10 +182,10 @@ end
   def castling_move_identified?(start,destination)
     x,y = start
     i,j = destination
-    start_piece = @grid[x][y].cell
-    dest_piece = @grid[i][j].cell
-    friendly_color = start_piece.color
-    return true if start_piece.instance_of?(King) && (dest_piece.instance_of?(Rook) && dest_piece.color == friendly_color)
+    king_piece = @grid[x][y].cell
+    rook_piece = @grid[i][j].cell
+    friendly_color = king_piece.color
+    return true if king_piece.instance_of?(King) && (rook_piece.instance_of?(Rook) && rook_piece.color == friendly_color)
     false
   end
 

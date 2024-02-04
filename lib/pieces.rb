@@ -5,7 +5,7 @@ class Piece
   end
 
   def valid_move?(start,destination,table)
-   return true if destination_valid?(destination,table) && path_available?(start,destination,table)
+   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table)
    false
   end
 
@@ -71,13 +71,18 @@ class Piece
 
 
 
- def destination_valid?(destination,table)
+ def destination_valid?(start, destination, table)
   x,y = destination
   square = table[x][y].cell
   own_side = self.color
   return true if square == nil
   return false if square.color == own_side
   true
+end
+
+def change_attribute_of_piece
+  self.range = 1 if self.instance_of?(Pawn)
+  self.first_move = false
 end
 
 end
@@ -92,10 +97,6 @@ end
       @range = @first_move == true ? 2 : 1
     end
 
-    def change_pawn_range
-      self.range = 1
-      self.first_move = false
-    end
   end
 
   class Bishop < Piece
@@ -109,15 +110,18 @@ end
   end
 
     class Rook < Piece
+      attr_accessor :first_move
       def initialize(color=nil)
         @symbol = color == 'white' ? 'r' : 'r'
         @range = 7
         @directions = [[1,0],[-1,0],[0,1],[0,-1]]
+        @first_move = true
         super(color)
       end
     end
 
     class Knight < Piece
+
       def initialize(color=nil)
         @directions = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
         @symbol = color == 'white' ? 'n' : 'n'
@@ -137,10 +141,12 @@ end
     end
 
     class King < Piece
+      attr_accessor :first_move
       def initialize(color=nil)
         @symbol = color == 'white' ? 'k' : 'k'
         @range = 1
         @directions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
+        @first_move = true
         super(color)
 
       end
