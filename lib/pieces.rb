@@ -1,11 +1,15 @@
+require_relative 'modules.rb'
+
 class Piece
+  include InterClassSquareMethods
+
   attr_accessor :symbol, :color, :range, :directions
   def initialize(color = nil)
   @color = color
   end
 
   def valid_move?(start,destination,table)
-   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table)
+   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table) && !king_moving_into_square_under_attack?(self,destination,table)
    false
   end
 
@@ -36,7 +40,7 @@ class Piece
         new_x = x+dx*i
         new_y = y+dy*i
 
-        if (new_x).between?(0,7) && (new_y).between?(0,7)
+        if within_boundaries?(new_x,new_y)
          current_square = table[new_x][new_y]
          if current_square == destination_square
           return true if check_sequence(sequence)
@@ -57,7 +61,7 @@ class Piece
       self.directions.each do | dx, dy |
         new_x = x+dx
         new_y = y+dy
-        if (new_x).between?(0,7) && (new_y).between?(0,7)
+        if within_boundaries?(new_x,new_y)
         square = table[new_x][new_y]
             return true if square == destination_square
           end

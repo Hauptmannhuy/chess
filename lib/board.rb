@@ -1,4 +1,9 @@
+require_relative 'modules.rb'
+
 class Board
+
+include InterClassSquareMethods
+
   attr_accessor :grid, :move_order
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
@@ -70,28 +75,6 @@ class Board
   end
 
 
-  def escape_check(color)
-    loop do
-      puts 'Type coordinates to select a piece (For example: 2A)'
-      start = select_coordinate(true)
-      x,y = start
-      start_piece = @grid[x][y].cell
-      puts 'Type coordinates to select a destination (For example: 3A)'
-      destination = select_coordinate
-      if start_piece.valid_move?(start, destination, @grid)
-        change_squares(start_piece,start, destination)
-        king_coords = find_king(color)
-        if !square_under_enemy_attack?(king_coords,color)
-        @check_declared = false
-       return
-       else
-        puts 'Wrong move!'
-        change_squares(start_piece ,destination, start)
-       end
-     end
-    end
-  end
-
   def choose_coordinates
       puts 'Type coordinates to select a piece (For example: 2A)'
       start = select_coordinate(true)
@@ -117,9 +100,14 @@ end
     end
   end
 
+  def process_path(piece, start, destination,board)
+    piece.valid_move?(start,destination,board)
+  end
+
+
   def piece_first_move?(piece)
     if piece.instance_of?(Pawn) || piece.instance_of?(Rook) || piece.instance_of?(King)
-      return true if piece.first == true
+      return true if piece.first_move == true
     end
     false
   end
@@ -129,7 +117,7 @@ end
     i,j = destination
     start_piece = @grid[x][y].cell
     rook_piece = @grid[i][j].cell
-    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, start_piece.color)
+    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, start_piece.color,@grid)
      castling_square(start_piece,start,destination,rook_piece)
     else
       puts 'Invalid move. Try again.'
@@ -168,7 +156,7 @@ end
     squares = extract_castling_path(start,destination)
     return false if !check_castling_path(squares)
     squares.each do |square|
-      return false if square_under_enemy_attack?(square,color)
+      return false if square_under_enemy_attack?(square,color,@grid)
     end
     true
   end
@@ -206,13 +194,28 @@ end
     false
   end
 
-  def process_path(piece, start, destination,board)
-    piece.valid_move?(start,destination,board)
-  end
 
-  def within_boundaries?(x_coordinate,y_coordinate)
-    return true if (x_coordinate).between?(0,7) && (y_coordinate).between?(0,7)
-    false
+
+  def escape_check(color)
+    loop do
+      puts 'Type coordinates to select a piece (For example: 2A)'
+      start = select_coordinate(true)
+      x,y = start
+      start_piece = @grid[x][y].cell
+      puts 'Type coordinates to select a destination (For example: 3A)'
+      destination = select_coordinate
+      if start_piece.valid_move?(start, destination, @grid)
+        change_squares(start_piece,start, destination)
+        king_coords = find_king(color)
+        if !square_under_enemy_attack?(king_coords,color,@grid)
+        @check_declared = false
+       return
+       else
+        puts 'Wrong move!'
+        change_squares(start_piece ,destination, start)
+       end
+     end
+    end
   end
 
 
@@ -346,26 +349,14 @@ end
     king_coordinates = find_king(king_color)
     x,y = king_coordinates
     destination = [x,y]
-    if square_under_enemy_attack?(destination,king_color)
+    if square_under_enemy_attack?(destination,king_color,@grid)
       @check_declared = true
       return true
     end
      false
   end
 
-  def square_under_enemy_attack?(destination, king_color)
-    enemy_color = king_color == 'black' ? 'white' : 'black'
-    @grid.each_with_index do |row, x|
-      row.each_with_index do |square,y|
-        if !square.cell.nil? && square.cell.color == enemy_color
-          start = [x,y]
-          piece = square.cell
-         return true if piece.valid_move?(start,destination,@grid)
-        end
-      end
-    end
-    false
-  end
+
 
   def find_king(color)
     @grid.each_with_index do |row, x|
@@ -416,6 +407,7 @@ end
     end
   end
 
+
   def square_not_nil?(input)
     x,y = input
     square = @grid[x][y].cell
@@ -442,6 +434,7 @@ end
       input = gets.chomp.downcase.split('')
     end
   end
+
 
 #   def clean_board
 #     @grid.each_with_index do |row,x|
