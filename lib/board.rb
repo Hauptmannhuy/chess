@@ -71,21 +71,22 @@ class Board
 
 
   def escape_check(color)
-    king_initial_position = find_king(color)
-    x,y = king_initial_position
-    king_piece = @grid[x][y].cell
     loop do
-      puts 'Select coordinate to withdraw your king!'
+      puts 'Type coordinates to select a piece (For example: 2A)'
+      start = select_coordinate(true)
+      x,y = start
+      start_piece = @grid[x][y].cell
+      puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
-     if king_piece.valid_move?(king_initial_position, destination, @grid)
-      change_squares(king_piece,king_initial_position, destination)
-
-       if !square_under_enemy_attack?(destination,color)
+      if start_piece.valid_move?(start, destination, @grid)
+        change_squares(start_piece,start, destination)
+        king_coords = find_king(color)
+        if !square_under_enemy_attack?(king_coords,color)
         @check_declared = false
        return
        else
         puts 'Wrong move!'
-        change_squares(king_piece ,destination, king_initial_position)
+        change_squares(start_piece ,destination, start)
        end
      end
     end
@@ -126,10 +127,10 @@ end
   def castling_move(start, destination)
     x,y = start
     i,j = destination
-    king_piece = @grid[x][y].cell
+    start_piece = @grid[x][y].cell
     rook_piece = @grid[i][j].cell
-    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, king_piece.color)
-     change_squares(king_piece,start,destination,rook_piece)
+    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, start_piece.color)
+     change_squares(start_piece,start,destination,rook_piece)
     else
       puts 'Invalid move. Try again.'
       choose_coordinates
@@ -182,10 +183,10 @@ end
   def castling_move_identified?(start,destination)
     x,y = start
     i,j = destination
-    king_piece = @grid[x][y].cell
+    start_piece = @grid[x][y].cell
     rook_piece = @grid[i][j].cell
-    friendly_color = king_piece.color
-    return true if king_piece.instance_of?(King) && (rook_piece.instance_of?(Rook) && rook_piece.color == friendly_color)
+    friendly_color = start_piece.color
+    return true if start_piece.instance_of?(King) && (rook_piece.instance_of?(Rook) && rook_piece.color == friendly_color)
     false
   end
 
@@ -246,12 +247,12 @@ end
 
 
   def possible_directions(x,y)
-    king_piece = @grid[x][y].cell
+    start_piece = @grid[x][y].cell
     king_coordinate = [x,y]
-    directions = king_piece.directions
+    directions = start_piece.directions
     sequences = []
     directions.each do | dx, dy |
-      squares_iterated = iterate_squares(dx,dy,king_piece,king_coordinate)
+      squares_iterated = iterate_squares(dx,dy,start_piece,king_coordinate)
       sequences << squares_iterated
     end
     knight_directions = knight_directions(king_coordinate)

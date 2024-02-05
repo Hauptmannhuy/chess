@@ -147,8 +147,7 @@ describe Board do
         board.instance_variable_set(:@grid, table)
         board.instance_variable_set(:@check_declared, true)
         allow(board).to receive(:puts)
-        allow(board).to receive(:find_king).and_return([3,3])
-        allow(board).to receive(:select_coordinate).and_return([4,3])
+        allow(board).to receive(:select_coordinate).and_return([3,3],[4,3])
       end
       it 'changes instance variable @check_declared to false and completes loop' do
       expect{board.escape_check('black')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
@@ -165,8 +164,7 @@ describe Board do
       board.instance_variable_set(:@grid, table)
       board.instance_variable_set(:@check_declared, true)
       allow(board).to receive(:puts)
-      allow(board).to receive(:find_king).and_return([3,3])
-      allow(board).to receive(:select_coordinate).and_return([2,2],[4,3])
+      allow(board).to receive(:select_coordinate).and_return([3,3],[2,2],[3,3],[4,3])
     end
     it 'prints error message once and then changes instance variable @check_declared to false and completes loop' do
       error_message = 'Wrong move!'
@@ -185,8 +183,7 @@ context 'when white king is in check and user is trying to escape to correct coo
     board.instance_variable_set(:@grid, table)
     board.instance_variable_set(:@check_declared, true)
     allow(board).to receive(:puts)
-    allow(board).to receive(:find_king).and_return([3,3])
-    allow(board).to receive(:select_coordinate).and_return([4,3])
+    allow(board).to receive(:select_coordinate).and_return([3,3],[2,3])
   end
   it 'prints error message once and then changes instance variable @check_declared to false and completes loop' do
   expect{board.escape_check('white')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
@@ -202,8 +199,7 @@ context 'when white king is in check and user is trying to escape to correct inc
     board.instance_variable_set(:@grid, table)
     board.instance_variable_set(:@check_declared, true)
     allow(board).to receive(:puts)
-    allow(board).to receive(:find_king).and_return([3,3])
-    allow(board).to receive(:select_coordinate).and_return([2,2],[4,3])
+    allow(board).to receive(:select_coordinate).and_return([3,3],[2,2],[3,3],[4,3])
   end
   it 'changes instance variable @check_declared to false and completes loop' do
     error_message = 'Wrong move!'
@@ -211,8 +207,27 @@ context 'when white king is in check and user is trying to escape to correct inc
   expect{board.escape_check('white')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
 end
 end
+context 'when king is in check and player chooses friendly rook and block path to enemy Queen by that exit the check' do
+  before do
+  table =  board.instance_variable_get(:@grid)
+  black_queen = Queen.new('black')
+  white_rook = Rook.new('white')
+  white_king = King.new('white')
+  table[4][0].cell = white_rook
+  table[3][3].cell = white_king
+  table[7][7].cell = black_queen
+  board.instance_variable_set(:@grid, table)
+  board.instance_variable_set(:@check_declared, true)
+  allow(board).to receive(:puts)
+  allow(board).to receive(:select_coordinate).and_return([4,0],[4,4])
+  end
+   it 'changes instance variable @check_declared to false and completes loop' do
+    expect{board.escape_check('white')}.to change{board.instance_variable_get(:@check_declared)}.from(true).to(false)
+
+end
 end
 
+end
   describe '#king_escape_possible?' do
     context 'when king is in danger of be taken by enemy queen but has escape routes' do
       before do
