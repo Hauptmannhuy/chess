@@ -130,11 +130,27 @@ end
     start_piece = @grid[x][y].cell
     rook_piece = @grid[i][j].cell
     if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, start_piece.color)
-     change_squares(start_piece,start,destination,rook_piece)
+     castling_square(start_piece,start,destination,rook_piece)
     else
       puts 'Invalid move. Try again.'
       choose_coordinates
     end
+  end
+
+  def castling_square(start_piece,start,destination,rook_piece)
+    i,j = destination
+    x,y = start
+    @grid[x][y].cell = nil
+    @grid[i][j].cell = nil
+    if j == 0
+      new_position_rook = [i,j+y-1]
+      new_position_king = [x,y-2]
+    else
+      new_position_rook = [i,j-2]
+      new_position_king = [x,y+2]
+    end
+    @grid[new_position_king[0]][new_position_king[1]].cell = start_piece
+    @grid[new_position_rook[0]][new_position_rook[1]].cell = rook_piece
   end
 
   def pieces_meet_castling_criteria?(start, destination)

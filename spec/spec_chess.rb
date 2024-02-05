@@ -451,13 +451,13 @@ end
   end
   describe '#castling_move' do
     context "when colors of pieces correspond to conditions, didn't make any moves and path not under attack, neither the king" do
-      it 'calls #change_squares' do
+      it 'calls #castling_square' do
       table = board.instance_variable_get(:@grid)
       table[0][4].cell = King.new('white')
       table[0][7].cell = Rook.new('white')
       start = [0,4]
       dest = [0,7]
-      expect(board).to receive(:change_squares)
+      expect(board).to receive(:castling_square)
       board.castling_move(start,dest)
       end
     end
