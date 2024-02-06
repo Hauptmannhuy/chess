@@ -91,9 +91,9 @@ end
   def standard_move(start,destination)
       x,y = start
       piece = @grid[x][y].cell
-      if process_path(piece, start, destination,@grid)
+      if move_valid?(piece,start,destination)
         piece.change_attribute_of_piece if piece_first_move?(piece)
-        return change_squares(@grid,piece, start, destination)
+        return change_board(@grid,piece, start, destination)
       else
         puts 'Invalid move. Try again.'
         return choose_coordinates
@@ -195,7 +195,7 @@ end
   end
 
 
-
+# refact
   def escape_check(color)
     loop do
       puts 'Type coordinates to select a piece (For example: 2A)'
@@ -205,14 +205,14 @@ end
       puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
       if start_piece.valid_move?(start, destination, @grid)
-        change_squares(@grid,start_piece,start, destination)
+        change_board(@grid,start_piece,start, destination)
         king_coords = find_king(color)
         if !square_under_enemy_attack?(king_coords,color,@grid)
         @check_declared = false
        return
        else
         puts 'Wrong move!'
-        change_squares(@grid,start_piece ,destination, start)
+        change_board(@grid,start_piece ,destination, start)
        end
      end
     end
@@ -259,18 +259,17 @@ end
       next if !within_boundaries?(new_x,new_y)
       destination = [new_x,new_y]
       destination_piece = @grid[new_x][new_y]
-      return true if fake_move_valid?(piece,start,destination)
+      return true if move_valid?(piece,start,destination)
     end
     false
   end
 
-def fake_move_valid?(piece,start,destination)
+def move_valid?(piece,start,destination)
   table = copy_grid
   x,y = start
   i,j = destination
   if piece.valid_move?(start,destination,table)
-   change_squares(table,piece,start,destination)
-    return false if king_moved_into_square_under_attack?(piece,destination,table)
+    return false if king_moved_into_square_under_attack?(piece,start,destination,table)
     true
     else
       false
@@ -400,12 +399,12 @@ end
   def king_safe?(color,start,destination,piece)
     x,y = destination
     replacing_square = @grid[x][y].cell
-    change_squares(@grid,piece,start,destination)
+    change_board(@grid,piece,start,destination)
     if !in_check?(color)
-      change_squares(@grid,piece,destination,start,replacing_square)
+      change_board(@grid,piece,destination,start,replacing_square)
       true
     else
-      change_squares(@grid,piece,destination,start,replacing_square)
+      change_board(@grid,piece,destination,start,replacing_square)
       false
     end
 
@@ -421,7 +420,7 @@ end
 
   end
 
-  def change_squares(table,piece, start, destination, square_to_replace = nil)
+  def change_board(table,piece, start, destination, square_to_replace = nil)
     x,y = start
     i,j = destination
     table[i][j].cell = piece

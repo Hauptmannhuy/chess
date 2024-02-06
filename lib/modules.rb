@@ -1,8 +1,12 @@
 module InterClassSquareMethods
 
-  def king_moved_into_square_under_attack?(piece,destination,table)
-    return true if piece.instance_of?(King) && square_under_enemy_attack?(destination, piece.color,table)
-     false
+  def king_moved_into_square_under_attack?(piece,start,destination,table)
+    if piece.instance_of?(King)
+      change_board(table,piece,start,destination)
+      return true if square_under_enemy_attack?(destination, piece.color,table)
+    else
+      false
+    end
    end
 
    def square_under_enemy_attack?(destination, king_color, table)
