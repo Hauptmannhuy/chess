@@ -573,5 +573,17 @@ end
       expect(board.is_stalemate?).to be(true)
     end
   end
+  context 'Black to move is stalemated. The bishop has no legal moves because it is pinned to the king by the rook. ' do
+    it 'returns true' do
+      table = board.instance_variable_get(:@grid)
+      board.instance_variable_set(:@move_order, true)
+      table[7][0].cell = King.new('black')
+      table[7][1].cell = Bishop.new('black')
+      table[5][1].cell = King.new('white')
+      table[7][7].cell = Rook.new('white')
+      expect(board.is_stalemate?).to be(true)
+
+    end
+  end
   end
 end

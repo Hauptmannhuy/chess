@@ -100,9 +100,6 @@ end
     end
   end
 
-  def process_path(piece, start, destination,board)
-    piece.valid_move?(start,destination,board)
-  end
 
 
   def piece_first_move?(piece)
@@ -195,7 +192,6 @@ end
   end
 
 
-# refact
   def escape_check(color)
     loop do
       puts 'Type coordinates to select a piece (For example: 2A)'
@@ -220,12 +216,12 @@ end
     false
   end
 
-  def in_check?(king_color = @move_order == false ? 'black' : 'white')
+  def in_check?(team_color = @move_order == false ? 'black' : 'white')
 
-    king_coordinates = find_king(king_color)
+    king_coordinates = find_king(team_color)
     x,y = king_coordinates
     destination = [x,y]
-    if square_under_enemy_attack?(destination,king_color,@grid)
+    if square_under_enemy_attack?(destination,team_color,@grid)
       @check_declared = true
       return true
     end
@@ -260,12 +256,13 @@ end
     false
   end
 
+
 def move_valid?(piece,start,destination)
   table = copy_grid
   x,y = start
   i,j = destination
   if piece.valid_move?(start,destination,table)
-    return false if king_moved_into_square_under_attack?(piece,start,destination,table)
+    return false if move_exposed_king?(piece,start,destination,table)
     true
     else
       false
@@ -321,7 +318,7 @@ end
         if !square.cell.nil? && square.cell.color == color && !square.cell.instance_of?(King)
           start = [x,y]
           piece = square.cell
-          if piece.valid_move?(start,destination,@grid)
+          if move_valid?(piece,start,destination)
             return true if king_safe?(color,start,destination,piece)
           end
         end
@@ -330,6 +327,42 @@ end
     false
   end
 
+
+  def king_safe?(color,start,destination,piece)
+    x,y = destination
+    table = copy_grid
+    change_board(table,piece,start,destination)
+    king = find_king(color,table)
+    if square_under_enemy_attack?(king,color,table)
+      false
+    else
+      true
+    end
+
+  end
+
+
+  def move_exposed_king?(piece,start,destination,table)
+    change_board(table,piece,start,destination)
+    king_coords = find_king(piece.color,table)
+    return true if square_under_enemy_attack?(king_coords, piece.color,table)
+    false
+ end
+
+ def square_under_enemy_attack?(destination, team_color, table)
+  enemy_color = team_color == 'black' ? 'white' : 'black'
+  table.each_with_index do |row, x|
+    row.each_with_index do |square,y|
+
+      if !square.cell.nil? && square.cell.color == enemy_color
+        start = [x,y]
+        piece = square.cell
+       return true if piece.valid_move?(start,destination,table)
+      end
+    end
+  end
+  false
+end
 
   def possible_directions(x,y)
     start_piece = @grid[x][y].cell
@@ -392,23 +425,8 @@ end
   end
 
 
-  def king_safe?(color,start,destination,piece)
-    x,y = destination
-    replacing_square = @grid[x][y].cell
-    change_board(@grid,piece,start,destination)
-    if !in_check?(color)
-      change_board(@grid,piece,destination,start,replacing_square)
-      true
-    else
-      change_board(@grid,piece,destination,start,replacing_square)
-      false
-    end
-
-  end
-
-
-  def find_king(color)
-    @grid.each_with_index do |row, x|
+  def find_king(color, table = @grid)
+    table.each_with_index do |row, x|
       row.each_with_index do |square,y|
       return [x,y]  if square.cell.instance_of?(King) && square.cell.color == color
       end
@@ -416,11 +434,11 @@ end
 
   end
 
-  def change_board(table,piece, start, destination, square_to_replace = nil)
+  def change_board(table,piece, start, destination)
     x,y = start
     i,j = destination
     table[i][j].cell = piece
-    table[x][y].cell = square_to_replace
+    table[x][y].cell = nil
   end
 
 
