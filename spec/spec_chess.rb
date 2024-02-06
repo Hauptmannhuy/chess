@@ -515,4 +515,63 @@ end
     end
   end
   end
+  describe "is_stalemate?" do
+    context "Black to move is stalemated. Black is not in check and has no legal move since every square the king might move to is attacked by White." do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        board.instance_variable_set(:@move_order, true)
+        table[0][0].cell = King.new('white')
+        table[7][7].cell = King.new('black')
+        table[5][6].cell = Queen.new('white')
+        expect(board.is_stalemate?).to be(true)
+      end
+    end
+    context "Black to move is stalemated by pawn in front and king behind the pawn" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        board.instance_variable_set(:@move_order, true)
+        table[7][4].cell = King.new('black')
+        table[6][4].cell = Queen.new('white')
+        table[5][4].cell = King.new('white')
+        expect(board.is_stalemate?).to be(true)
+      end
+    end
+    context "Matulović versus Minev stalemate" do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        board.instance_variable_set(:@move_order, true)
+        table[4][7].cell = King.new('black')
+        table[2][7].cell = King.new('white')
+        table[3][5].cell = Pawn.new('white')
+        table[5][0].cell = Rook.new('white')
+        expect(board.is_stalemate?).to be(true)
+      end
+    end
+    context 'Williams versus Harrwitz' do
+      it 'returns true' do
+        table = board.instance_variable_get(:@grid)
+        board.instance_variable_set(:@move_order, false)
+        table[0][0].cell = King.new('white')
+        table[1][0].cell = Pawn.new('black')
+        table[2][1].cell = Rook.new('black')
+        table[2][2].cell = Knight.new('black')
+        table[3][2].cell = King.new('black')
+        expect(board.is_stalemate?).to be(true)
+      end
+    end
+    context "Black to move is stalemated (a deadlock)." do
+    it 'returns true' do
+      table = board.instance_variable_get(:@grid)
+      board.instance_variable_set(:@move_order, true)
+      table[0][7].cell = King.new('black')
+      table[0][6].cell = Rook.new('black')
+      table[0][5].cell = Bishop.new('black')
+      table[0][4].cell = King.new('white')
+      table[1][4].cell = Pawn.new('black')
+      table[1][6].cell = Pawn.new('black')
+      table[1][7].cell = Pawn.new('black')
+      expect(board.is_stalemate?).to be(true)
+    end
+  end
+  end
 end

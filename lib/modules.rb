@@ -1,6 +1,6 @@
 module InterClassSquareMethods
 
-  def king_moving_into_square_under_attack?(piece,destination,table)
+  def king_moved_into_square_under_attack?(piece,destination,table)
     return true if piece.instance_of?(King) && square_under_enemy_attack?(destination, piece.color,table)
      false
    end
@@ -9,6 +9,7 @@ module InterClassSquareMethods
     enemy_color = king_color == 'black' ? 'white' : 'black'
     table.each_with_index do |row, x|
       row.each_with_index do |square,y|
+
         if !square.cell.nil? && square.cell.color == enemy_color
           start = [x,y]
           piece = square.cell

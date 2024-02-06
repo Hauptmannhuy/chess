@@ -93,7 +93,7 @@ end
       piece = @grid[x][y].cell
       if process_path(piece, start, destination,@grid)
         piece.change_attribute_of_piece if piece_first_move?(piece)
-        return change_squares(piece, start, destination)
+        return change_squares(@grid,piece, start, destination)
       else
         puts 'Invalid move. Try again.'
         return choose_coordinates
@@ -205,18 +205,89 @@ end
       puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
       if start_piece.valid_move?(start, destination, @grid)
-        change_squares(start_piece,start, destination)
+        change_squares(@grid,start_piece,start, destination)
         king_coords = find_king(color)
         if !square_under_enemy_attack?(king_coords,color,@grid)
         @check_declared = false
        return
        else
         puts 'Wrong move!'
-        change_squares(start_piece ,destination, start)
+        change_squares(@grid,start_piece ,destination, start)
        end
      end
     end
   end
+
+
+  def check_mate(color = @move_order == false ? 'black' : 'white')
+    return true if !piece_defend_king_possible?(color) && !king_escape_possible?(color)
+    false
+  end
+
+  def in_check?(king_color = @move_order == false ? 'black' : 'white')
+
+    king_coordinates = find_king(king_color)
+    x,y = king_coordinates
+    destination = [x,y]
+    if square_under_enemy_attack?(destination,king_color,@grid)
+      @check_declared = true
+      return true
+    end
+     false
+  end
+
+  def is_stalemate?
+    color = @move_order == false ? 'white' : 'black'
+    @grid.each_with_index do |row,x|
+      row.each_with_index do |square,y|
+        current_piece = @grid[x][y].cell
+        if !current_piece.nil? && current_piece.color == color
+          start = [x,y]
+          return false if piece_can_move?(current_piece, start)
+        end
+      end
+    end
+    true
+  end
+
+  def piece_can_move?(piece, start)
+    x,y = start
+    directions = piece.directions
+    directions.each do |dx,dy|
+      new_x = dx+x
+      new_y = dy+y
+      next if !within_boundaries?(new_x,new_y)
+      destination = [new_x,new_y]
+      destination_piece = @grid[new_x][new_y]
+      return true if fake_move_valid?(piece,start,destination)
+    end
+    false
+  end
+
+def fake_move_valid?(piece,start,destination)
+  table = copy_grid
+  x,y = start
+  i,j = destination
+  if piece.valid_move?(start,destination,table)
+   change_squares(table,piece,start,destination)
+    return false if king_moved_into_square_under_attack?(piece,destination,table)
+    true
+    else
+      false
+  end
+end
+
+def copy_grid
+  new_grid = Array.new(8) { Array.new(8) }
+
+  @grid.each_with_index do |row, i|
+    row.each_with_index do |square, j|
+      new_grid[i][j] = square.dup
+    end
+  end
+  new_grid
+end
+
 
 
   def king_escape_possible?(color = @move_order == false ? 'black' : 'white')
@@ -311,20 +382,6 @@ end
     array
   end
 
-  def king_safe?(color,start,destination,piece)
-    x,y = destination
-    replacing_square = @grid[x][y].cell
-    change_squares(piece,start,destination)
-    if !in_check?(color)
-      change_squares(piece,destination,start,replacing_square)
-      true
-    else
-      change_squares(piece,destination,start,replacing_square)
-      false
-    end
-
-  end
-
   def adjacency_squares_king(x_coordinate,y_coordinate,color)
     array = []
     directions = @grid[x_coordinate][y_coordinate].cell.directions
@@ -339,23 +396,20 @@ end
     array
   end
 
-  def check_mate(color = @move_order == false ? 'black' : 'white')
-    return true if !piece_defend_king_possible?(color) && !king_escape_possible?(color)
-    false
-  end
 
-  def in_check?(king_color = @move_order == false ? 'black' : 'white')
-
-    king_coordinates = find_king(king_color)
-    x,y = king_coordinates
-    destination = [x,y]
-    if square_under_enemy_attack?(destination,king_color,@grid)
-      @check_declared = true
-      return true
+  def king_safe?(color,start,destination,piece)
+    x,y = destination
+    replacing_square = @grid[x][y].cell
+    change_squares(@grid,piece,start,destination)
+    if !in_check?(color)
+      change_squares(@grid,piece,destination,start,replacing_square)
+      true
+    else
+      change_squares(@grid,piece,destination,start,replacing_square)
+      false
     end
-     false
-  end
 
+  end
 
 
   def find_king(color)
@@ -367,11 +421,11 @@ end
 
   end
 
-  def change_squares(piece, start, destination, square_to_replace = nil)
+  def change_squares(table,piece, start, destination, square_to_replace = nil)
     x,y = start
     i,j = destination
-    @grid[i][j].cell = piece
-    @grid[x][y].cell = square_to_replace
+    table[i][j].cell = piece
+    table[x][y].cell = square_to_replace
   end
 
 

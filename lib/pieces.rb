@@ -9,7 +9,7 @@ class Piece
   end
 
   def valid_move?(start,destination,table)
-   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table) && !king_moving_into_square_under_attack?(self,destination,table)
+   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table)
    false
   end
 
