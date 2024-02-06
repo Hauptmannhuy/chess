@@ -204,16 +204,12 @@ end
       start_piece = @grid[x][y].cell
       puts 'Type coordinates to select a destination (For example: 3A)'
       destination = select_coordinate
-      if start_piece.valid_move?(start, destination, @grid)
-        change_board(@grid,start_piece,start, destination)
-        king_coords = find_king(color)
-        if !square_under_enemy_attack?(king_coords,color,@grid)
+      if move_valid?(start_piece,start,destination)
+        change_board(@grid,start_piece,start,destination)
         @check_declared = false
        return
        else
         puts 'Wrong move!'
-        change_board(@grid,start_piece ,destination, start)
-       end
      end
     end
   end
