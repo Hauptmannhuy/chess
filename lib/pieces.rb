@@ -1,7 +1,7 @@
 require_relative 'modules.rb'
 
 class Piece
-  include InterClassSquareMethods
+  include InterClassMethods
 
   attr_accessor :symbol, :color, :range, :directions
   def initialize(color = nil)
@@ -96,7 +96,7 @@ end
     def initialize(color=nil)
       @directions = color == 'white' ? [[1,0]] : [[-1,0]]
       @first_move = true
-      @symbol = color == 'white' ? 'p' : 'p'
+      @symbol = color == 'black' ? "\u{265F}" : "\u{2659}"
       super(color)
       @range = @first_move == true ? 2 : 1
     end
@@ -105,7 +105,7 @@ end
 
   class Bishop < Piece
     def initialize(color=nil)
-      @symbol = color == 'white' ? 'b' : 'b'
+      @symbol = color == 'black' ? "\u{2657}" : "\u{265D}"
       @range = 7
       @directions = [[1,1],[1,-1],[-1,1],[-1,-1]]
       super(color)
@@ -116,7 +116,7 @@ end
     class Rook < Piece
       attr_accessor :first_move
       def initialize(color=nil)
-        @symbol = color == 'white' ? 'r' : 'r'
+        @symbol = color == 'black' ? "\u{2656}" : "\u{265C}"
         @range = 7
         @directions = [[1,0],[-1,0],[0,1],[0,-1]]
         @first_move = true
@@ -128,7 +128,7 @@ end
 
       def initialize(color=nil)
         @directions = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
-        @symbol = color == 'white' ? 'n' : 'n'
+        @symbol = color == 'black' ? "\u{2658}" : "\u{265E}"
         super(color)
 
       end
@@ -136,7 +136,7 @@ end
 
     class Queen < Piece
       def initialize(color=nil)
-        @symbol = color == 'white' ? 'q' : 'q'
+        @symbol = color == 'black' ? "\u{2655}" : "\u{265B}"
         @range = 7
         @directions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
         super(color)
@@ -147,7 +147,7 @@ end
     class King < Piece
       attr_accessor :first_move
       def initialize(color=nil)
-        @symbol = color == 'white' ? 'k' : 'k'
+        @symbol = color == 'black' ? "\u{2654}" : "\u{265A}"
         @range = 1
         @directions = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]
         @first_move = true

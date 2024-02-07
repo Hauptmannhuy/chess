@@ -2,9 +2,9 @@ require_relative 'modules.rb'
 
 class Board
 
-include InterClassSquareMethods
+include InterClassMethods
 
-  attr_accessor :grid, :move_order
+  attr_accessor :grid, :move_order, :check_declared
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
     @move_order = false
@@ -58,7 +58,7 @@ include InterClassSquareMethods
         i+=1
       end
     end
-    array.each do |row|
+    array.reverse.each do |row|
       puts row.join(' ')
     end
     puts ['*',*('a'..'h')].join(' ').upcase
@@ -84,7 +84,7 @@ include InterClassSquareMethods
 end
 
   def indetify_move(start,destination)
-    return castling_move if castling_move_identified?(start,destination)
+    return castling_move(start,destination) if castling_move_identified?(start,destination)
     standard_move(start,destination)
   end
 
@@ -142,12 +142,20 @@ end
     i,j = destination
     start_piece = @grid[x][y].cell
     rook_piece = @grid[i][j].cell
-    if pieces_meet_castling_criteria?(start,destination) && castling_move_legit?(start,destination) && !square_under_enemy_attack?(start, start_piece.color,@grid)
+    if castling_move_possible?(start,destination,start_piece.color)
      castling_square(start_piece,start,destination,rook_piece)
     else
       puts 'Invalid move. Try again.'
       choose_coordinates
     end
+  end
+
+  def castling_move_possible?(start,destination,color)
+    return false if !pieces_meet_castling_criteria?(start,destination)
+    if castling_move_legit?(start,destination) && !square_under_enemy_attack?(start,color,@grid)
+      return true
+    end
+    false
   end
 
   def castling_square(start_piece,start,destination,rook_piece)
@@ -164,6 +172,8 @@ end
     end
     @grid[new_position_king[0]][new_position_king[1]].cell = start_piece
     @grid[new_position_rook[0]][new_position_rook[1]].cell = rook_piece
+    start_piece.first_move = false
+    rook_piece.first_move = false
   end
 
   def pieces_meet_castling_criteria?(start, destination)
@@ -222,6 +232,7 @@ end
 
   def escape_check(color)
     loop do
+      puts 'Your king in check!'
       puts 'Type coordinates to select a piece (For example: 2A)'
       start = select_coordinate(true)
       x,y = start
@@ -529,15 +540,6 @@ end
       input = gets.chomp.downcase.split('')
     end
   end
-
-
-#   def clean_board
-#     @grid.each_with_index do |row,x|
-#       row.each_with_index do |square,y|
-#         square.cell = nil
-#       end
-#     end
-# end
 
 end
 

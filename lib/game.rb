@@ -35,7 +35,28 @@ class Game
       play_round
       display_board
       in_check?
+      return declare_game_over if check_mate? || stalemate?
       switch_turn
+    end
+  end
+
+  def check_mate?
+   board.check_mate
+
+  end
+
+  def stalemate?
+   board.is_stalemate?
+  end
+
+  def declare_game_over
+    check_declared = board.check_declared
+    move_order = board.move_order
+    if check_declared == true
+      puts "#{players[0]} wins!" if move_order == false
+      puts "#{players[1]} wins!" if move_order == true
+    else
+      puts "It's a draw!"
     end
   end
 
