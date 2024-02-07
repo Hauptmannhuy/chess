@@ -93,14 +93,42 @@ end
       piece = @grid[x][y].cell
       if move_valid?(piece,start,destination)
         piece.change_attribute_of_piece if piece_first_move?(piece)
-        return change_board(@grid,piece, start, destination)
+        return complete_turn(@grid,piece,start,destination)
       else
         puts 'Invalid move. Try again.'
         return choose_coordinates
     end
   end
 
+  def complete_turn(board,piece,start,destination)
+    if piece.instance_of?(Pawn) && (destination[0] == 0 || destination[0] == 7)
+      promote_pawn(start,destination,board,piece.color)
+    else
+      change_board(@grid,piece, start, destination)
+    end
+  end
 
+  def promote_pawn(start,destination,board,color)
+    input = promotion_promt
+    promotion_piece = nil
+    case input
+    in 1 then promotion_piece = Queen.new(color)
+    in 2 then promotion_piece = Rook.new(color)
+    in 3 then promotion_piece = Bishop.new(color)
+    in 4 then promotion_piece = Knight.new(color)
+    end
+    change_board(board,promotion_piece,start,destination)
+  end
+
+  def promotion_promt
+    puts "You can promote your pawn!\n What shall it be?\n Print number to choose"
+    puts "1:Queen\n2:Rook\n3:Bishop\n4:Knight"
+    loop do
+    input = gets.chomp.to_i
+    return input if input.between?(1,4)
+    puts 'Wrong number!'
+    end
+  end
 
   def piece_first_move?(piece)
     if piece.instance_of?(Pawn) || piece.instance_of?(Rook) || piece.instance_of?(King)
