@@ -4,11 +4,12 @@ class Board
 
 include InterClassMethods
 
-  attr_accessor :grid, :move_order, :check_declared
+  attr_accessor :grid, :move_order, :check_declared, :en_passant_queue
   def initialize
     @grid = Array.new(8) { Array.new(8){ Square.new } }
     @move_order = false
     @check_declared = false
+    @en_passant_queue = []
   end
 
 
@@ -103,6 +104,9 @@ end
   def complete_turn(board,piece,start,destination)
     if piece.instance_of?(Pawn) && (destination[0] == 0 || destination[0] == 7)
       promote_pawn(start,destination,board,piece.color)
+    elsif piece.instance_of?(Pawn) && piece.pawn_made_two_square_advance(start,destination)
+      en_passant_enqueue(piece)
+      change_board(@grid,piece, start, destination)
     else
       change_board(@grid,piece, start, destination)
     end
@@ -539,6 +543,14 @@ end
       puts 'Error! Select correct value.'
       input = gets.chomp.downcase.split('')
     end
+  end
+
+  def en_passant_enqueue(piece)
+    @en_passant_queue.unshift(piece)
+  end
+
+  def en_passant_dequeue
+    @en_passant_queue.pop
   end
 
 end

@@ -36,7 +36,7 @@ class Game
       display_board
       in_check?
       return declare_game_over if check_mate? || stalemate?
-      switch_turn
+      end_turn
     end
   end
 
@@ -57,6 +57,21 @@ class Game
       puts "#{players[1]} wins!" if move_order == true
     else
       puts "It's a draw!"
+    end
+  end
+
+  def end_turn
+    en_passant_dequeue
+    switch_turn
+  end
+
+  def en_passant_dequeue
+    move_order = self.board.move_order
+    piece = self.board.en_passant_queue.last
+    if move_order == false
+        self.board.en_passant_dequeue if piece.color == 'black'
+    elsif move_order == true
+      self.board.en_passant_dequeue if piece.color == 'white'
     end
   end
 

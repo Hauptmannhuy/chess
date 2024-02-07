@@ -89,6 +89,13 @@ def change_attribute_of_piece
   self.first_move = false
 end
 
+def pawn_made_two_square_advance(start,destination)
+  i,j = destination
+  return true if [i-2,j] == start
+  return true if [i+2,j] == start
+  false
+end
+
 end
 
   class Pawn < Piece
