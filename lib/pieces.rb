@@ -23,7 +23,7 @@ class Piece
   end
 
   def capture_pawn_directions(destination,table)
-    return [[0,-1],[0,1]] if destination_is_el_passant?(destination,table)
+    return [[0,-1],[0,1]] if destination_is_en_passant?(destination,table)
     return [[1,1],[1,-1]] if self.color == 'white'
     return [[-1,1],[-1,-1]] if self.color == 'black'
   end
@@ -90,7 +90,7 @@ def change_attribute_of_piece
   self.first_move = false
 end
 
- def destination_is_el_passant?(destination,table)
+ def destination_is_en_passant?(destination,table)
     x,y = destination
    return true if table[x][y].cell.instance_of?(Pawn) && table[x][y].cell.en_passant == true
    false

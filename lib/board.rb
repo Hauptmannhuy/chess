@@ -102,16 +102,28 @@ end
   end
 
   def complete_turn(board,piece,start,destination)
-    if piece.instance_of?(Pawn) && (destination[0] == 0 || destination[0] == 7)
+    if promotion_possible?(piece,destination)
       promote_pawn(start,destination,board,piece.color)
-    elsif piece.instance_of?(Pawn) && piece.pawn_made_two_square_advance(start,destination)
+    elsif pawn_moved_two_squares?(piece,start,destination)
       en_passant_enqueue(piece)
       change_board(@grid,piece, start, destination)
-    elsif piece.instance_of?(Pawn) && (!board[destination[0]][destination[1]].cell.nil? && board[destination[0]][destination[1]].cell.en_passant == true )
+    elsif pawn_taken_as_en_passant?(piece,board,destination)
       en_passant_change_board(@grid,piece,start,destination)
     else
       change_board(@grid,piece, start, destination)
     end
+  end
+
+  def promotion_possible?(piece,destination)
+    piece.instance_of?(Pawn) && (destination[0] == 0 || destination[0] == 7)
+  end
+
+  def pawn_moved_two_squares?(piece,start,destination)
+    piece.instance_of?(Pawn) && piece.pawn_made_two_square_advance(start,destination)
+  end
+
+  def pawn_taken_as_en_passant?(piece,board,destination)
+    piece.instance_of?(Pawn) && (!board[destination[0]][destination[1]].cell.nil? && board[destination[0]][destination[1]].cell.en_passant == true )
   end
 
   def promote_pawn(start,destination,board,color)
