@@ -68,11 +68,13 @@ class Game
   def en_passant_dequeue
     move_order = self.board.move_order
     piece = self.board.en_passant_queue.last
-    if move_order == false
+    queue = self.board.en_passant_queue
+    if move_order == false && !queue.empty?
         self.board.en_passant_dequeue if piece.color == 'black'
-    elsif move_order == true
+    elsif move_order == true && !queue.empty?
       self.board.en_passant_dequeue if piece.color == 'white'
     end
+    puts queue
   end
 
   def in_check?

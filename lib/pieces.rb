@@ -22,7 +22,8 @@ class Piece
     end
   end
 
-  def capture_pawn_directions
+  def capture_pawn_directions(destination,table)
+    return [[0,-1],[0,1]] if destination_is_el_passant?(destination,table)
     return [[1,1],[1,-1]] if self.color == 'white'
     return [[-1,1],[-1,-1]] if self.color == 'black'
   end
@@ -32,7 +33,7 @@ class Piece
     destination_square = table[i][j]
     x,y = start
     range = self.range
-    directions = self.instance_of?(Pawn) && !destination_square.cell.nil? ? capture_pawn_directions : self.directions
+    directions = self.instance_of?(Pawn) && !destination_square.cell.nil? ? capture_pawn_directions(destination,table) : self.directions
 
     directions.each do | dx, dy |
       sequence = []
@@ -89,6 +90,12 @@ def change_attribute_of_piece
   self.first_move = false
 end
 
+ def destination_is_el_passant?(destination,table)
+    x,y = destination
+   return true if table[x][y].cell.instance_of?(Pawn) && table[x][y].cell.en_passant == true
+   false
+ end
+
 def pawn_made_two_square_advance(start,destination)
   i,j = destination
   return true if [i-2,j] == start
@@ -99,13 +106,14 @@ end
 end
 
   class Pawn < Piece
-    attr_accessor :first_move, :range
+    attr_accessor :first_move, :en_passant
     def initialize(color=nil)
       @directions = color == 'white' ? [[1,0]] : [[-1,0]]
       @first_move = true
       @symbol = color == 'black' ? "\u{265F}" : "\u{2659}"
-      super(color)
       @range = @first_move == true ? 2 : 1
+      @en_passant = false
+      super(color)
     end
 
   end

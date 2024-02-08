@@ -586,4 +586,18 @@ end
     end
   end
   end
+  describe '#el_passant' do
+    context 'Black pawn made move as two squares in advance and stopped near the white pawn' do
+        it 'takes black pawn and board changes in order el passant movement' do
+          table = board.instance_variable_get(:@grid)
+          black_pawn = Pawn.new('black')
+          black_pawn.en_passant = true
+          white_pawn = Pawn.new('white')
+          table[3][3].cell = white_pawn
+          table[3][4].cell = black_pawn
+          board.standard_move([3,3],[3,4])
+          expect(table[4][4].cell).to eq(white_pawn)
+        end
+    end
+  end
 end

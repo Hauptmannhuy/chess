@@ -107,6 +107,8 @@ end
     elsif piece.instance_of?(Pawn) && piece.pawn_made_two_square_advance(start,destination)
       en_passant_enqueue(piece)
       change_board(@grid,piece, start, destination)
+    elsif piece.instance_of?(Pawn) && (!board[destination[0]][destination[1]].cell.nil? && board[destination[0]][destination[1]].cell.en_passant == true )
+      en_passant_change_board(@grid,piece,start,destination)
     else
       change_board(@grid,piece, start, destination)
     end
@@ -484,6 +486,16 @@ end
     table[x][y].cell = nil
   end
 
+  def en_passant_change_board(table,piece,start,destination)
+    x,y = start
+    i,j = destination
+    table[x][y].cell = nil
+    table[i][j].cell = nil
+    table[i+1][j].cell = piece if piece.color == 'white'
+    table[i-1][j].cell = piece if piece.color == 'black'
+
+  end
+
 
   def move_turn_order
     @move_order = @move_order == false ? true : false
@@ -546,10 +558,12 @@ end
   end
 
   def en_passant_enqueue(piece)
+    piece.en_passant = true
     @en_passant_queue.unshift(piece)
   end
 
   def en_passant_dequeue
+    @en_passant_queue.last.en_passant = false
     @en_passant_queue.pop
   end
 
