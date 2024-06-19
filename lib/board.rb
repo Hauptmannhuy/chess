@@ -12,11 +12,30 @@ include InterClassMethods
     @en_passant_queue = []
   end
 
+  def find_en_passant_positions
+    arr = []
+    queue = @en_passant_queue.dup
+    until queue.empty? do
+      object = queue.shift
+      @grid.each_with_index do |row,x|
+        row.each_with_index do |square,y|
+          if square.cell == object
+            arr << [x,y]
+          end
+        end
+      end
+    end
+    arr
+  end
+
   def to_json(options ={})
     hash = {}
     self.instance_variables.each do |var|
-     p  instance_variable_get(var)
-      hash[var] = instance_variable_get(var).to_json
+      if var == :@en_passant_queue && !@en_passant_queue.empty?
+        hash[var] = find_en_passant_positions.to_json
+      else
+        hash[var] = instance_variable_get(var).to_json
+      end
     end
      hash.to_json
   end
