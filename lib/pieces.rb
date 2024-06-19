@@ -8,6 +8,14 @@ class Piece
   @color = color
   end
 
+  def to_json(options={})
+    hash = {}
+    instance_variables.each do |var|
+      hash[var] = instance_variable_get(var)
+    end
+    hash
+  end
+
   def valid_move?(start,destination,table)
    return true if destination_valid?(start , destination, table) && path_available?(start,destination,table)
    false

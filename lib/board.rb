@@ -12,6 +12,15 @@ include InterClassMethods
     @en_passant_queue = []
   end
 
+  def to_json(options ={})
+    hash = {}
+    self.instance_variables.each do |var|
+     p  instance_variable_get(var)
+      hash[var] = instance_variable_get(var).to_json
+    end
+     hash.to_json
+  end
+
 
   def place_pieces(color)
   place_first_line(color)
@@ -585,5 +594,13 @@ class Square
   attr_accessor :cell
   def initialize
     @cell = nil
+  end
+
+  def to_json(options = {})
+    hash = {}
+    instance_variables.each do |var|
+      hash[var] = instance_variable_get(var).to_json
+    end
+    hash.to_json
   end
 end

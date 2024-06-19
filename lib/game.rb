@@ -32,12 +32,47 @@ class Game
     loop do
       announcment
       display_board
+      return promt_load if save_promt
       play_round
       display_board
       in_check?
       return declare_game_over if check_mate? || stalemate?
       end_turn
     end
+  end
+
+  def promt_load
+    puts 'do you want load the game?'
+    load_game
+  end
+
+  def save_promt
+    puts 'type save if you want to save the game or press enter if not'
+    input = gets.chomp
+     return false if input != 'save'
+    save = to_json 
+    
+    File.new('save','w')
+    f = File.open('save','w')  
+    f.write(save)
+    f.close
+    true
+  end
+
+  def load_game
+    f = File.open('save')
+    deser = JSON.load(f)
+    deser['@board'] = JSON.load(deser['@board'])
+    deser['@board']['@grid'] = JSON.load(deser['@board']['@grid'])
+    pp deser
+  end
+
+  def to_json()
+    hash = {}
+    self.instance_variables.each do |var|
+      hash[var] = instance_variable_get(var).to_json
+    end
+     hash.to_json
   end
 
   def check_mate?
