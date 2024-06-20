@@ -187,7 +187,7 @@ end
     elsif pawn_moved_two_squares?(piece,start,destination)
       en_passant_enqueue(piece)
       change_board(@grid,piece, start, destination)
-    elsif pawn_taken_as_en_passant?(piece,board,destination)
+    elsif pawn_taken_as_en_passant?(piece,board,start,destination)
       en_passant_change_board(@grid,piece,start,destination)
     else
       change_board(@grid,piece, start, destination)
@@ -202,8 +202,8 @@ end
     piece.instance_of?(Pawn) && piece.pawn_made_two_square_advance(start,destination)
   end
 
-  def pawn_taken_as_en_passant?(piece,board,destination)
-    piece.instance_of?(Pawn) && (!board[destination[0]][destination[1]].cell.nil? && board[destination[0]][destination[1]].cell.en_passant == true )
+  def pawn_taken_as_en_passant?(piece,board,start,destination)
+    piece.instance_of?(Pawn) && (!board[destination[0]][destination[1]].cell.nil? && board[destination[0]][destination[1]].cell.en_passant == true ) && start[0] == destination[0]
   end
 
   def promote_pawn(start,destination,board,color)

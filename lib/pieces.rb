@@ -35,9 +35,11 @@ class Piece
   end
 
   def capture_pawn_directions(destination,table)
-    return [[0,-1],[0,1]] if destination_is_en_passant?(destination,table)
-    return [[1,1],[1,-1]] if self.color == 'white'
-    return [[-1,1],[-1,-1]] if self.color == 'black'
+    directions = self.color == 'white' ? [[1,1],[1,-1]] : [[-1,1],[-1,-1]]
+     if destination_is_en_passant?(destination,table)
+      [[0,-1],[0,1]].each { |arr| directions << arr  }
+     end
+     directions
   end
 
   def pave_path(start, destination, table )
@@ -46,7 +48,6 @@ class Piece
     x,y = start
     range = self.range
     directions = self.instance_of?(Pawn) && !destination_square.cell.nil? ? capture_pawn_directions(destination,table) : self.directions
-
     directions.each do | dx, dy |
       sequence = []
       (1..range).map do | i |
