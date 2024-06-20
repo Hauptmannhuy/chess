@@ -11,8 +11,12 @@ class Piece
   def to_json(options={})
     hash = {}
     instance_variables.each do |var|
+      if var == :@symbol 
+        hash[var] = self.class.to_s.downcase
+      else
       hash[var] = instance_variable_get(var)
     end
+  end
     hash
   end
 

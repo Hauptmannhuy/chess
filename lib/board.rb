@@ -12,6 +12,44 @@ include InterClassMethods
     @en_passant_queue = []
   end
 
+  def load_pieces(board)
+    deser_grid = board['@board']['@grid']
+    deser_grid.each_with_index do |row,x|
+      row.each_with_index do |square,y|
+        if square['@cell'] != 'null'
+          obj = square['@cell']
+          piece = obj['@symbol']
+          color = obj['@color']
+          if obj['@symbol'] == 'pawn' || obj['@symbol'] == 'king'
+            special = obj['@symbol'] == 'pawn' ? obj['@en_passant'] : obj['@first_move']
+          end
+          @grid[x][y].cell = load_piece(piece,color,special)
+        end
+      end
+    end
+  end
+
+  def load_instances(parameters)
+    @move_order = parameters['@board']['@move_order'] == 'false' ? false : true
+    @check_declared = parameters['@board']['@check_declared'] == 'false' ? false : true
+    load_pieces(parameters)
+    load_en_passant(parameters['@board']['@en_passant_queue'])
+  end
+
+  def load_piece(piece,color,special = nil)
+    case piece
+    when 'pawn' then piece = Pawn.new(color)
+    when 'bishop' then piece = Bishop.new(color)
+    when 'rook' then piece = Rook.new(color)
+    when 'queen' then piece = Queen.new(color)
+    when 'knight' then piece = Knight.new(color)
+    when 'king' then piece = King.new(color)
+    end
+      piece.en_passant = special if piece.class == Pawn
+      piece.first_move = special if piece.class == King
+      piece
+  end
+
   def find_en_passant_positions
     arr = []
     queue = @en_passant_queue.dup
@@ -26,6 +64,20 @@ include InterClassMethods
       end
     end
     arr
+  end
+
+  def load_en_passant(queue)
+    queue = JSON.load(queue)
+    while !queue.empty?
+        coord = queue.shift
+      @grid.each_with_index do |row,x|
+        row.each_with_index do |square,y|
+          if coord == [x,y]
+            @en_passant_queue << square.cell
+          end
+        end
+      end
+    end
   end
 
   def to_json(options ={})

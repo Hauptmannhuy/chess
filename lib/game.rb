@@ -7,8 +7,7 @@ class Game
 
   def self.start
     game = Game.new
-    game.board.place_pieces('black')
-    game.board.place_pieces('white')
+    
     game.introduction
   end
 
@@ -16,12 +15,16 @@ class Game
   puts 'Welcome to chess game!'
   puts 'Human vs Human (press 1)'
   puts 'Human vs computer (press 2)'
-  puts 'Please, select game mode to continue.'
+  puts 'Please, select game mode to continue or type load to load saved game'
     loop do
-  input = gets.chomp.to_i
-  if input.between?(1,2) && input == 1
+  input = gets.chomp
+  if input.to_i.between?(1,2) && input.to_i == 1
+    board.place_pieces('black')
+    board.place_pieces('white')
     two_players_initialize
     return play
+  elsif input == 'load'
+    return load_game
   else
     puts 'Please, type proper number to choose gamemode.'
   end
@@ -32,18 +35,26 @@ class Game
     loop do
       announcment
       display_board
-      return promt_load if save_promt
       play_round
       display_board
       in_check?
       return declare_game_over if check_mate? || stalemate?
       end_turn
+      return menu if save_promt
     end
   end
 
-  def promt_load
-    puts 'do you want load the game?'
-    load_game
+  def menu
+    
+    
+  end
+
+  def load_game
+    save = deserialize
+    board = save['@board']
+    @players = JSON.load(save['@players'])
+    @board.load_instances(save)
+    play
   end
 
   def save_promt
@@ -59,12 +70,12 @@ class Game
     true
   end
 
-  def load_game
+  def deserialize
     f = File.open('save')
     deser = JSON.load(f)
     deser['@board'] = JSON.load(deser['@board'])
     deser['@board']['@grid'] = JSON.load(deser['@board']['@grid'])
-    pp deser
+     deser
   end
 
   def to_json()
