@@ -4,8 +4,8 @@ Chess Game is a classic board game brought into the digital realm, offering an i
 This project aims to recreate the traditional game of chess in a command line
 
 ##Features
-- Capability to play vs user
-- Save game capability (soon)
+- Capability to play human vs human
+- Save game capability
 
 ## Technologies Used
 - Ruby

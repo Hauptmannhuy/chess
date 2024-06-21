@@ -45,13 +45,31 @@ class Game
   end
 
   def menu
-    
-    
+    puts 'Type "load" if you want to load the game'
+    puts 'Type "exit" if you want to quit'
+    input = gets.chomp
+    if input == 'load'
+      load_game
+    else
+      puts 'Exiting...'
+    end
   end
 
   def load_game
-    save = deserialize
-    board = save['@board']
+    saves = Dir.children('saves')
+    error = 'There is no such save name'
+    if saves.empty?
+      puts 'The directory is empty'
+      return introduction
+    end
+    puts 'Type the name of the game to load'
+    saves.each{|name| puts name}
+    input = gets.chomp
+    unless saves.include?(input)
+      puts error
+      input = gets.chomp
+    end
+    save = deserialize(input)
     @players = JSON.load(save['@players'])
     @board.load_instances(save)
     play
@@ -61,17 +79,19 @@ class Game
     puts 'type save if you want to save the game or press enter if not'
     input = gets.chomp
      return false if input != 'save'
-    save = to_json 
-    
-    File.new('save','w')
-    f = File.open('save','w')  
-    f.write(save)
-    f.close
+      save = to_json 
+      Dir.mkdir("saves") unless Dir.exist?("saves")
+      name = "save #{Dir.children('saves').count}"
+      File.new("saves/#{name}",'w')
+      f = File.open("saves/#{name}",'w')  
+      f.write(save)
+      f.close
+      puts 'Game successfully saved!'
     true
   end
 
-  def deserialize
-    f = File.open('save')
+  def deserialize(input)
+    f = File.open("saves/#{input}")
     deser = JSON.load(f)
     deser['@board'] = JSON.load(deser['@board'])
     deser['@board']['@grid'] = JSON.load(deser['@board']['@grid'])
