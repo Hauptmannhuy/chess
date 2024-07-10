@@ -6,4 +6,15 @@ module InterClassMethods
   end
 
 
+
 end
+
+class Array
+  def each_square
+    self.each_with_index do |row, x|
+      row.each_with_index do |cell, y|
+        yield x,y,cell
+    end
+  end
+end
+ end

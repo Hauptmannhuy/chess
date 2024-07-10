@@ -6,7 +6,7 @@ include InterClassMethods
 
   attr_accessor :grid, :move_order, :check_declared, :en_passant_queue
   def initialize
-    @grid = Array.new(8) { Array.new(8){ Square.new } }
+    @grid = Array.new(8){ Array.new(8){ Square.new } }
     @move_order = false
     @check_declared = false
     @en_passant_queue = []
@@ -14,8 +14,7 @@ include InterClassMethods
 
   def load_pieces(board)
     deser_grid = board['@board']['@grid']
-    deser_grid.each_with_index do |row,x|
-      row.each_with_index do |square,y|
+    deser_grid.each_square do |x,y,square|
         if square['@cell'] != 'null'
           obj = square['@cell']
           piece = obj['@symbol']
@@ -25,7 +24,6 @@ include InterClassMethods
           end
           @grid[x][y].cell = load_piece(piece,color,special)
         end
-      end
     end
   end
 
@@ -55,13 +53,11 @@ include InterClassMethods
     queue = @en_passant_queue.dup
     until queue.empty? do
       object = queue.shift
-      @grid.each_with_index do |row,x|
-        row.each_with_index do |square,y|
+      @grid.each_square do |x,y,square|
           if square.cell == object
             arr << [x,y]
           end
         end
-      end
     end
     arr
   end
@@ -70,13 +66,11 @@ include InterClassMethods
     queue = JSON.load(queue)
     while !queue.empty?
         coord = queue.shift
-      @grid.each_with_index do |row,x|
-        row.each_with_index do |square,y|
+      @grid.each_square do |x,y,square|
           if coord == [x,y]
             @en_passant_queue << square.cell
           end
         end
-      end
     end
   end
 
@@ -367,15 +361,13 @@ end
 
   def is_stalemate?
     color = @move_order == false ? 'white' : 'black'
-    @grid.each_with_index do |row,x|
-      row.each_with_index do |square,y|
+    @grid.each_square do |x,y|
         current_piece = @grid[x][y].cell
         if !current_piece.nil? && current_piece.color == color
           start = [x,y]
           return false if piece_can_move?(current_piece, start)
         end
       end
-    end
     true
   end
 
@@ -409,11 +401,9 @@ end
 def copy_grid
   new_grid = Array.new(8) { Array.new(8) }
 
-  @grid.each_with_index do |row, i|
-    row.each_with_index do |square, j|
-      new_grid[i][j] = square.dup
+  @grid.each_square do |x,y,square|
+      new_grid[x][y] = square.dup
     end
-  end
   new_grid
 end
 
@@ -450,8 +440,7 @@ end
   end
 
   def process_piece_defence_king(color,destination)
-    @grid.each_with_index do |row,x|
-      row.each_with_index do |square, y|
+    @grid.each_square do |x,y,square|
         if !square.cell.nil? && square.cell.color == color && !square.cell.instance_of?(King)
           start = [x,y]
           piece = square.cell
@@ -459,7 +448,6 @@ end
             return true if king_safe?(color,start,destination,piece)
           end
         end
-      end
     end
     false
   end
@@ -488,15 +476,13 @@ end
 
  def square_under_enemy_attack?(destination, team_color, table)
   enemy_color = team_color == 'black' ? 'white' : 'black'
-  table.each_with_index do |row, x|
-    row.each_with_index do |square,y|
+  table.each_square do |x, y, square|
 
       if !square.cell.nil? && square.cell.color == enemy_color
         start = [x,y]
         piece = square.cell
        return true if piece.valid_move?(start,destination,table)
       end
-    end
   end
   false
 end
@@ -563,12 +549,9 @@ end
 
 
   def find_king(color, table = @grid)
-    table.each_with_index do |row, x|
-      row.each_with_index do |square,y|
+    table.each_square do |x, y, square|
       return [x,y]  if square.cell.instance_of?(King) && square.cell.color == color
       end
-    end
-
   end
 
   def change_board(table,piece, start, destination)
