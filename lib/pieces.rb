@@ -11,7 +11,7 @@ class Piece
   def to_json(options={})
     hash = {}
     instance_variables.each do |var|
-      if var == :@symbol 
+      if var == :@symbol
         hash[var] = self.class.to_s.downcase
       else
       hash[var] = instance_variable_get(var)
@@ -21,17 +21,8 @@ class Piece
   end
 
   def valid_move?(start,destination,table)
-   return true if destination_valid?(start , destination, table) && path_available?(start,destination,table)
+   return true if destination_valid?(start , destination, table) && pave_path(start,destination,table)
    false
-  end
-
-  def path_available?(start,destination,table)
-
-    if self.instance_of?(Knight)
-      knight_moves(start, destination, table)
-    else
-      pave_path(start, destination, table)
-    end
   end
 
   def capture_pawn_directions(destination,table)
@@ -65,22 +56,6 @@ class Piece
       end
     end
     false
-    end
-
-    def knight_moves(start,destination, table)
-      x,y = start
-      i,j = destination
-      destination_square = table[i][j]
-
-      self.directions.each do | dx, dy |
-        new_x = x+dx
-        new_y = y+dy
-        if within_boundaries?(new_x,new_y)
-        square = table[new_x][new_y]
-            return true if square == destination_square
-          end
-      end
-      false
     end
 
     def check_sequence(sequence)
@@ -157,6 +132,7 @@ end
       def initialize(color=nil)
         @directions = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
         @symbol = color == 'black' ? "\u{2658}" : "\u{265E}"
+        @range = 1
         super(color)
 
       end

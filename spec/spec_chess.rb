@@ -38,6 +38,28 @@ describe Piece do
       end
     end
   end
+
+  describe 'knight movement' do
+    context 'when white knight moves from 1C to 3B' do
+      table[0][1].cell = Knight.new('white')
+      piece = table[0][1].cell
+      start = [0,1]
+      destination = [2,2]
+      it 'returns true' do
+        expect(piece.valid_move?(start,destination,table)).to eq(true)
+      end
+    end
+    context 'when white knight moves from 1C to 4B' do
+      table[0][1].cell = Knight.new('white')
+      piece = table[0][1].cell
+      start = [0,1]
+      destination = [3,2]
+      it 'returns false' do
+        expect(piece.valid_move?(start,destination,table)).to eq(false)
+      end
+    end
+  end
+
   end
   describe '#change_attribute_of_piece' do
     context 'when pawn makes his first move' do
