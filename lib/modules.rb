@@ -16,5 +16,5 @@ class Array
         yield x,y,cell
     end
   end
+  end
 end
- end

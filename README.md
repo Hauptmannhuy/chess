@@ -5,7 +5,7 @@ This project aims to recreate the traditional game of chess in a command line
 
 ##Features
 - Capability to play human vs human
-- Save game capability
+- Save game feature
 
 ## Technologies Used
 - Ruby
